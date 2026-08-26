@@ -1,0 +1,115 @@
+@extends('layouts.app')
+
+@section('content')
+<div class="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12 py-8 sm:py-12">
+
+    {{-- Back button --}}
+    <a href="{{ route('mental.mode') }}?{{ http_build_query(request()->query()) }}" class="inline-flex items-center gap-1.5 text-sm text-warm-400 hover:text-warm-600 transition-colors mb-6">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        Back
+    </a>
+
+    {{-- Header --}}
+    <div class="mb-8 animate-fade-in">
+        <div class="w-12 h-12 rounded-xl bg-mental-100 border border-mental-200 flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-mental-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+        </div>
+        <h1 class="font-display font-bold text-2xl sm:text-3xl text-warm-800 mb-2">Let's figure this out</h1>
+        <p class="text-warm-500 leading-relaxed">We'll give you some perspective on what you've shared — not a diagnosis, just some things to think about.</p>
+    </div>
+
+    {{-- Chat-like interface --}}
+    <div id="chat-container" class="space-y-4 mb-6">
+
+        {{-- User's input summary --}}
+        <div class="flex gap-3 animate-fade-in">
+            <div class="w-8 h-8 rounded-full bg-warm-200 flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4 text-warm-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+            </div>
+            <div class="bg-warm-100 rounded-2xl rounded-tl-md p-4 max-w-[85%]">
+                <p class="text-sm text-warm-700 leading-relaxed">
+                    <span class="font-semibold">You shared:</span> You think you might be dealing with <span class="font-semibold text-mental-600">{{ ucfirst(str_replace('-', ' ', request('concern', 'something on your mind'))) }}</span>.
+                    @if(request('why_thinking'))
+                        <br><span class="text-warm-500">"{{ request('why_thinking') }}"</span>
+                    @endif
+                </p>
+            </div>
+        </div>
+
+        {{-- AI Response placeholder --}}
+        <div class="flex gap-3 animate-fade-in" style="animation-delay: 0.2s;">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-mental-300 to-mental-500 flex items-center justify-center shrink-0">
+                <span class="text-white font-bold text-xs">T</span>
+            </div>
+            <div class="bg-mental-50 border border-mental-200 rounded-2xl rounded-tl-md p-4 max-w-[85%]">
+                <div class="text-sm text-mental-700 leading-relaxed space-y-3">
+                    <p>Thanks for sharing that. Here are a few things worth considering:</p>
+
+                    <div class="bg-white rounded-xl p-3 border border-mental-100">
+                        <p class="font-semibold text-mental-600 mb-1">What you described</p>
+                        <p>The patterns you're noticing are valid reasons to look into this further. Whether it turns out to be what you think or something else entirely, paying attention to how you feel is always a good first step.</p>
+                    </div>
+
+                    <div class="bg-white rounded-xl p-3 border border-mental-100">
+                        <p class="font-semibold text-mental-600 mb-1">Some perspective</p>
+                        <p>Online content can be helpful for understanding yourself, but it's easy to see yourself in every description you read. A professional can help you sort through what's real and what might be coincidence.</p>
+                    </div>
+
+                    <div class="bg-white rounded-xl p-3 border border-mental-100">
+                        <p class="font-semibold text-mental-600 mb-1">What we'd suggest</p>
+                        <p>This seems like something worth taking to a professional — not because it's necessarily serious, but because having an expert's perspective can give you clarity and peace of mind.</p>
+                    </div>
+
+                    <p class="text-xs text-warm-400 italic pt-2">Remember: this is general information, not a diagnosis. Only a trained professional can properly evaluate what you're experiencing.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    {{-- Action buttons --}}
+    <div class="flex flex-col sm:flex-row gap-3 animate-fade-in" style="animation-delay: 0.4s;">
+        <a href="{{ route('mental.index') }}" class="flex-1 py-3 px-6 rounded-xl border-2 border-mental-200 text-mental-600 font-semibold text-center hover:bg-mental-50 transition-colors">
+            Start over
+        </a>
+        <button onclick="openModal('resources')" class="flex-1 py-3 px-6 rounded-xl bg-mental-400 hover:bg-mental-500 text-white font-semibold transition-colors">
+            Show me resources
+        </button>
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const data = {
+            type: 'mental',
+            title: '{{ ucfirst(str_replace("-", " ", request("concern", "Mental health"))) }}',
+            data: {
+                concern: '{{ request('concern') }}',
+                why_thinking: @json(request('why_thinking', '')),
+                duration: '{{ request('duration') }}',
+                triggers: @json(request('triggers', '')),
+                mode: 'understand'
+            },
+            severity: null,
+            assessment: 'Mental health screening completed'
+        };
+
+        fetch('{{ route('screenings.store') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(data)
+        }).catch(() => {});
+    });
+</script>
+@endsection
