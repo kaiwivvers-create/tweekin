@@ -1,7 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12 py-8 sm:py-12">
+<div class="print-container max-w-5xl mx-auto px-6 sm:px-8 lg:px-12 py-8 sm:py-12">
+
+    @include('components.download-results', ['title' => 'Screening Results'])
 
     {{-- Back button --}}
     <a href="{{ route('other.index') }}" class="inline-flex items-center gap-1.5 text-sm text-warm-400 hover:text-warm-600 transition-colors mb-6">
@@ -80,8 +82,24 @@
         </div>
     </div>
 
+    {{-- AI Conclusion Chat --}}
+    @include('components.ai-conclusion', [
+        'context' => [
+            'type' => 'other',
+            'symptoms' => [request('lean', 'general')],
+            'presentSymptoms' => [],
+            'duration' => request('duration'),
+            'severity' => null,
+            'urgencyLabel' => 'Worth following up',
+            'seekHelp' => [
+                'Since you weren't sure which path fits, consider trying both screening flows',
+                'A primary care visit can help you figure out whether this is physical, mental, or both',
+            ],
+        ]
+    ])
+
     {{-- Action buttons --}}
-    <div class="flex flex-col sm:flex-row gap-3 animate-fade-in" style="animation-delay: 0.3s;">
+    <div class="flex flex-col sm:flex-row gap-3 animate-fade-in" style="animation-delay: 0.6s;">
         <a href="{{ route('home') }}" class="flex-1 py-3 px-6 rounded-xl border-2 border-other-200 text-other-600 font-semibold text-center hover:bg-other-50 transition-colors">
             Start over
         </a>

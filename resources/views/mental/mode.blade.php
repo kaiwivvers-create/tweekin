@@ -32,7 +32,7 @@
     <div class="space-y-4 stagger-children">
 
         {{-- Help me understand --}}
-        <a href="{{ route('mental.understand') }}?{{ http_build_query(request()->query()) }}&mode=understand" class="group block">
+        <a href="{{ route('mental.understand') }}?{{ http_build_query(array_merge(request()->query(), ['concern' => request('concern', [])])) }}&mode=understand" class="group block">
             <div class="relative bg-white rounded-2xl border-2 border-mental-200 p-6 sm:p-8 card-hover overflow-hidden">
                 <div class="absolute top-0 right-0 w-24 h-24 bg-mental-100 rounded-bl-[60px] -z-0 opacity-50 group-hover:opacity-100 transition-opacity"></div>
                 <div class="relative z-10 flex gap-5">
@@ -52,7 +52,7 @@
         </a>
 
         {{-- Just listen --}}
-        <a href="{{ route('mental.vent') }}?{{ http_build_query(request()->query()) }}&mode=vent" class="group block">
+        <a href="{{ route('mental.vent') }}?{{ http_build_query(array_merge(request()->query(), ['concern' => request('concern', [])])) }}&mode=vent" class="group block">
             <div class="relative bg-white rounded-2xl border-2 border-mental-200 p-6 sm:p-8 card-hover overflow-hidden">
                 <div class="absolute bottom-0 left-0 w-24 h-24 bg-mental-100 rounded-tr-[60px] -z-0 opacity-50 group-hover:opacity-100 transition-opacity"></div>
                 <div class="relative z-10 flex gap-5">

@@ -120,36 +120,42 @@
                 </div>
 
                 <div class="flex-1 max-w-lg lg:max-w-none animate-fade-in" style="animation-delay: 0.15s;">
-                    <div class="relative w-full aspect-square max-w-md mx-auto">
-                        <svg class="absolute inset-0 w-full h-full" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <defs>
-                                <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" style="stop-color:#8CD9A0;stop-opacity:0.3"/>
-                                    <stop offset="100%" style="stop-color:#96C8FF;stop-opacity:0.3"/>
-                                </linearGradient>
-                                <linearGradient id="grad2" x1="100%" y1="0%" x2="0%" y2="100%">
-                                    <stop offset="0%" style="stop-color:#BEABFF;stop-opacity:0.25"/>
-                                    <stop offset="100%" style="stop-color:#FFDF85;stop-opacity:0.25"/>
-                                </linearGradient>
-                            </defs>
-                            <ellipse cx="200" cy="180" rx="160" ry="140" fill="url(#grad1)"/>
-                            <ellipse cx="160" cy="240" rx="120" ry="100" fill="url(#grad2)"/>
-                        </svg>
-                        <div class="absolute top-[15%] left-[20%] w-12 h-12 rounded-2xl bg-physical-100 border border-physical-200 flex items-center justify-center shadow-sm animate-pulse-soft">
-                            <svg class="w-6 h-6 text-physical-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                    @if($brand['hero_image_path'] ?? '')
+                        <div class="relative w-full aspect-[3/2] max-w-lg mx-auto rounded-3xl overflow-hidden shadow-xl border border-warm-200">
+                            <img src="{{ Storage::disk('public')->url($brand['hero_image_path']) }}" alt="{{ $brand['name'] }}" class="w-full h-full object-cover">
                         </div>
-                        <div class="absolute top-[10%] right-[15%] w-11 h-11 rounded-2xl bg-mental-100 border border-mental-200 flex items-center justify-center shadow-sm animate-pulse-soft" style="animation-delay: 0.5s;">
-                            <svg class="w-5 h-5 text-mental-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
-                        </div>
-                        <div class="absolute bottom-[20%] left-[10%] w-10 h-10 rounded-2xl bg-other-100 border border-other-200 flex items-center justify-center shadow-sm animate-pulse-soft" style="animation-delay: 1s;">
-                            <svg class="w-5 h-5 text-other-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        </div>
-                        <div class="absolute bottom-[30%] right-[8%] w-14 h-14 rounded-2xl bg-white border border-warm-200 flex items-center justify-center shadow-md animate-pulse-soft" style="animation-delay: 1.5s;">
-                            <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-400 via-white to-sky-400 flex items-center justify-center">
-                                <span class="text-warm-800 font-bold text-sm">T</span>
+                    @else
+                        <div class="relative w-full aspect-square max-w-md mx-auto">
+                            <svg class="absolute inset-0 w-full h-full" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#8CD9A0;stop-opacity:0.3"/>
+                                        <stop offset="100%" style="stop-color:#96C8FF;stop-opacity:0.3"/>
+                                    </linearGradient>
+                                    <linearGradient id="grad2" x1="100%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#BEABFF;stop-opacity:0.25"/>
+                                        <stop offset="100%" style="stop-color:#FFDF85;stop-opacity:0.25"/>
+                                    </linearGradient>
+                                </defs>
+                                <ellipse cx="200" cy="180" rx="160" ry="140" fill="url(#grad1)"/>
+                                <ellipse cx="160" cy="240" rx="120" ry="100" fill="url(#grad2)"/>
+                            </svg>
+                            <div class="absolute top-[15%] left-[20%] w-12 h-12 rounded-2xl bg-physical-100 border border-physical-200 flex items-center justify-center shadow-sm animate-pulse-soft">
+                                <svg class="w-6 h-6 text-physical-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                            </div>
+                            <div class="absolute top-[10%] right-[15%] w-11 h-11 rounded-2xl bg-mental-100 border border-mental-200 flex items-center justify-center shadow-sm animate-pulse-soft" style="animation-delay: 0.5s;">
+                                <svg class="w-5 h-5 text-mental-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                            </div>
+                            <div class="absolute bottom-[20%] left-[10%] w-10 h-10 rounded-2xl bg-other-100 border border-other-200 flex items-center justify-center shadow-sm animate-pulse-soft" style="animation-delay: 1s;">
+                                <svg class="w-5 h-5 text-other-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            </div>
+                            <div class="absolute bottom-[30%] right-[8%] w-14 h-14 rounded-2xl bg-white border border-warm-200 flex items-center justify-center shadow-md animate-pulse-soft" style="animation-delay: 1.5s;">
+                                <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-400 via-white to-sky-400 flex items-center justify-center">
+                                    <span class="text-warm-800 font-bold text-sm">T</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    @endif
                 </div>
             </div>
         </div>

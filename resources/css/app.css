@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import './print.css';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
@@ -136,3 +137,184 @@ label:has(input[type="radio"]:checked) > div {
 .other-radio label:has(input[type="radio"]:checked) > div {
     border-color: var(--color-other-400) !important;
 }
+
+/* ==================== DARK MODE ==================== */
+.dark body { background-color: #0f0e0d; color: #e0deda; }
+.dark { color: #e0deda; }
+
+/* Backgrounds */
+.dark .bg-white { background-color: #1c1b19 !important; }
+.dark .bg-warm-50 { background-color: #0f0e0d !important; }
+.dark .bg-warm-100 { background-color: #1c1b19 !important; }
+.dark .bg-warm-200 { background-color: #2a2826 !important; }
+
+/* Borders */
+.dark .border-warm-200 { border-color: #33302d !important; }
+.dark .border-warm-100 { border-color: #2a2826 !important; }
+.dark .border-2.border-warm-200 { border-color: #33302d !important; }
+.dark .border.border-warm-200 { border-color: #33302d !important; }
+
+/* Text — high contrast */
+.dark .text-warm-800 { color: #f5f3f0 !important; }
+.dark .text-warm-700 { color: #e8e5e1 !important; }
+.dark .text-warm-600 { color: #ccc9c4 !important; }
+.dark .text-warm-500 { color: #a8a49e !important; }
+.dark .text-warm-400 { color: #85817b !important; }
+.dark .placeholder-warm-400::placeholder,
+.dark .placeholder-warm-500::placeholder { color: #706d67 !important; }
+
+/* Inputs */
+.dark input[type="text"],
+.dark input[type="email"],
+.dark input[type="password"],
+.dark input[type="url"],
+.dark input[type="search"],
+.dark textarea,
+.dark select {
+    background-color: #0f0e0d !important;
+    border-color: #33302d !important;
+    color: #e8e5e1 !important;
+}
+.dark input:focus, .dark textarea:focus, .dark select:focus {
+    border-color: var(--color-mental-400) !important;
+    box-shadow: 0 0 0 2px rgba(150, 200, 255, 0.2);
+}
+.dark input[type="color"] { border-color: #33302d !important; }
+
+/* Physical theme */
+.dark .bg-physical-50 { background-color: #1f1c14 !important; }
+.dark .bg-physical-100 { background-color: #2a2717 !important; }
+.dark .border-physical-200 { border-color: #403a22 !important; }
+.dark .border-2.border-physical-200 { border-color: #403a22 !important; }
+.dark .text-physical-500 { color: #ffd86a !important; }
+.dark .text-physical-600 { color: #ffe9a0 !important; }
+.dark .text-physical-700 { color: #fff0bc !important; }
+.dark .bg-physical-50\/30 { background-color: rgba(31, 28, 20, 0.3) !important; }
+
+/* Mental theme */
+.dark .bg-mental-50 { background-color: #121820 !important; }
+.dark .bg-mental-100 { background-color: #18202c !important; }
+.dark .bg-mental-50\/50 { background-color: rgba(18, 24, 32, 0.5) !important; }
+.dark .border-mental-200 { border-color: #243a50 !important; }
+.dark .border-2.border-mental-200 { border-color: #243a50 !important; }
+.dark .text-mental-500 { color: #7cb8ff !important; }
+.dark .text-mental-600 { color: #a8d4ff !important; }
+.dark .text-mental-700 { color: #c4e2ff !important; }
+
+/* Other theme */
+.dark .bg-other-50 { background-color: #181420 !important; }
+.dark .bg-other-100 { background-color: #201c2c !important; }
+.dark .border-other-200 { border-color: #382e50 !important; }
+.dark .border-2.border-other-200 { border-color: #382e50 !important; }
+.dark .text-other-500 { color: #b8a0ff !important; }
+.dark .text-other-600 { color: #d0c0ff !important; }
+.dark .text-other-700 { color: #e0d4ff !important; }
+
+/* Semantic colors */
+.dark .text-success { color: #7ce8a0 !important; }
+.dark .text-warning { color: #ffe066 !important; }
+.dark .text-danger { color: #ff9b9b !important; }
+.dark .bg-success\/20 { background-color: rgba(124, 232, 160, 0.12) !important; }
+.dark .bg-warning\/20 { background-color: rgba(255, 224, 102, 0.12) !important; }
+.dark .bg-danger\/20 { background-color: rgba(255, 155, 155, 0.12) !important; }
+.dark .bg-success { background-color: #3a7a52 !important; }
+.dark .bg-warning { background-color: #8a7a20 !important; }
+.dark .bg-danger { background-color: #8a3a3a !important; }
+
+/* Overlays */
+.dark .bg-black\/60 { background-color: rgba(0, 0, 0, 0.65) !important; }
+.dark .bg-white\/80 { background-color: rgba(28, 27, 25, 0.9) !important; }
+.dark .bg-white\/60 { background-color: rgba(28, 27, 25, 0.7) !important; }
+.dark .bg-warm-50\/30 { background-color: rgba(15, 14, 13, 0.4) !important; }
+.dark .bg-warm-50\/50 { background-color: rgba(15, 14, 13, 0.5) !important; }
+.dark .bg-warm-100\/50 { background-color: rgba(28, 27, 25, 0.5) !important; }
+.dark .modal-backdrop { background-color: rgba(0, 0, 0, 0.6); }
+
+/* Scrollbar */
+.dark ::-webkit-scrollbar { background: #0f0e0d; }
+.dark ::-webkit-scrollbar-thumb { background: #33302d; border-radius: 999px; }
+.dark ::-webkit-scrollbar-thumb:hover { background: #444038; }
+
+/* Login/register page */
+.dark .bg-gradient-to-br { filter: brightness(0.5) saturate(0.8); }
+.dark .from-mental-50, .dark .from-mental-50\/50 { --tw-gradient-from: #121820 !important; }
+.dark .via-physical-50, .dark .via-physical-50\/50 { --tw-gradient-via: #1f1c14 !important; }
+.dark .to-other-50, .dark .to-other-50\/50 { --tw-gradient-to: #181420 !important; }
+
+/* Sidebar active states */
+.dark .bg-mental-100.text-mental-700 { background-color: #18202c !important; color: #a8d4ff !important; }
+.dark .bg-physical-100.text-physical-700 { background-color: #2a2717 !important; color: #ffe9a0 !important; }
+.dark .bg-other-100.text-other-700 { background-color: #201c2c !important; color: #d0c0ff !important; }
+
+/* Card hover */
+.dark .card-hover:hover { box-shadow: 0 12px 30px -8px rgba(0,0,0,0.5), 0 4px 12px -4px rgba(0,0,0,0.35); }
+
+/* Links */
+.dark a { color: inherit; }
+.dark a:hover { color: #fff !important; }
+.dark .hover\:text-warm-700:hover { color: #e8e5e1 !important; }
+.dark .hover\:text-warm-800:hover { color: #f5f3f0 !important; }
+.dark .hover\:text-warm-600:hover { color: #ccc9c4 !important; }
+
+/* Buttons */
+.dark .hover\:bg-warm-50:hover { background-color: #1c1b19 !important; }
+.dark .hover\:bg-warm-100:hover { background-color: #2a2826 !important; }
+.dark .hover\:bg-mental-50:hover { background-color: #121820 !important; }
+.dark .hover\:bg-physical-50:hover { background-color: #1f1c14 !important; }
+
+/* Severity bars */
+.dark .bg-success { background-color: #4a9a6a !important; }
+.dark .bg-warning { background-color: #b89a30 !important; }
+.dark .bg-danger { background-color: #cc5555 !important; }
+
+/* Print footer dark */
+.dark .bg-mental-50 { background-color: #121820 !important; }
+.dark .border-mental-200\/50 { border-color: rgba(36, 58, 80, 0.5) !important; }
+
+/* Tables */
+.dark table { border-color: #33302d !important; }
+.dark thead { border-bottom-color: #33302d !important; }
+.dark tbody tr { border-bottom-color: #2a2826 !important; }
+.dark tbody tr:hover { background-color: #1c1b19 !important; }
+.dark td, .dark th { border-color: #2a2826 !important; }
+
+/* Select dropdowns */
+.dark select option { background-color: #1c1b19; color: #e0deda; }
+
+/* Pagination */
+.dark .bg-warm-100.text-warm-800 { background-color: #33302d !important; color: #f5f3f0 !important; }
+.dark .border.border-warm-200.text-warm-500 { border-color: #33302d !important; color: #a8a49e !important; }
+.dark .border.border-warm-200.text-warm-500:hover { background-color: #2a2826 !important; }
+
+/* Alpine x-cloak */
+.dark [x-cloak] { display: none !important; }
+
+/* Landing page hero decorations */
+.dark .bg-physical-200\/30 { background-color: rgba(255, 232, 173, 0.08) !important; }
+.dark .bg-mental-200\/30 { background-color: rgba(184, 218, 255, 0.08) !important; }
+.dark .bg-other-200\/20 { background-color: rgba(210, 197, 255, 0.06) !important; }
+.dark .bg-physical-200\/20 { background-color: rgba(255, 232, 173, 0.06) !important; }
+.dark .bg-mental-200\/20 { background-color: rgba(184, 218, 255, 0.06) !important; }
+
+/* Hero floating shapes */
+.dark .bg-white\/60 { background-color: rgba(28, 27, 25, 0.6) !important; }
+
+/* Pulse ring on error pages */
+.dark .border-mental-200\/20 { border-color: rgba(184, 218, 255, 0.1) !important; }
+
+/* Landing page section backgrounds */
+.dark .bg-physical-50\/30 { background-color: rgba(31, 28, 20, 0.3) !important; }
+.dark .bg-mental-50\/30 { background-color: rgba(18, 24, 32, 0.3) !important; }
+.dark .bg-other-50\/30 { background-color: rgba(24, 20, 32, 0.3) !important; }
+
+/* Gradient text in dark mode */
+.dark .bg-gradient-to-br.from-mental-300.to-mental-500 { background: linear-gradient(to bottom right, #4a7ab5, #5088db) !important; }
+
+/* Brand preview boxes */
+.dark .bg-warm-100.font-display { background-color: #2a2826 !important; }
+
+/* Disclaimer bar */
+.dark .disclaimer-bar { background-color: #181614 !important; border-bottom-color: #2a2826 !important; color: #a8a49e !important; }
+.dark .disclaimer-bar .text-mental-400 { color: #7cb8ff !important; }
+.dark .disclaimer-bar button { color: #85817b !important; }
+.dark .disclaimer-bar button:hover { color: #ccc9c4 !important; }

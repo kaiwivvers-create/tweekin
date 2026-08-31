@@ -3,7 +3,7 @@
 @section('content')
 <div class="w-full flex">
     {{-- Sidebar with vertical progress --}}
-    <div class="hidden lg:flex w-24 shrink-0 border-r border-warm-200 bg-white/50 py-12 justify-center sticky top-14 h-[calc(100vh-3.5rem)]">
+    <div class="hidden lg:flex w-24 shrink-0 border-r border-mental-100 bg-mental-50/30 py-12 justify-center sticky top-14 h-[calc(100vh-3.5rem)]">
         @include('components.vertical-progress', ['steps' => ['Details', 'Mode', 'Results'], 'current' => 1, 'theme' => 'mental'])
     </div>
 
@@ -46,19 +46,38 @@
         </div>
 
         <form id="mental-form" action="{{ route('mental.mode') }}" method="GET" class="space-y-6">
-            <input type="hidden" name="concern" value="">
-
             <div class="animate-fade-in" style="animation-delay: 0.2s;">
-                <label class="block text-sm font-semibold text-warm-700 mb-3">What do you think might be going on?</label>
-                <div class="grid grid-cols-2 gap-2">
-                    <label class="block cursor-pointer"><input type="radio" name="concern_type" value="anxiety" class="peer hidden" required><div class="p-3 rounded-xl border-2 border-warm-200 bg-white text-center peer-checked:border-mental-400 peer-checked:bg-mental-50 hover:border-warm-300 transition-all duration-200"><div class="w-8 h-8 rounded-lg bg-mental-100 border border-mental-200 flex items-center justify-center mx-auto mb-1"><svg class="w-4 h-4 text-mental-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><div class="text-sm font-medium text-warm-600 peer-checked:text-mental-700">Anxiety</div></div></label>
-                    <label class="block cursor-pointer"><input type="radio" name="concern_type" value="depression" class="peer hidden"><div class="p-3 rounded-xl border-2 border-warm-200 bg-white text-center peer-checked:border-mental-400 peer-checked:bg-mental-50 hover:border-warm-300 transition-all duration-200"><div class="w-8 h-8 rounded-lg bg-mental-100 border border-mental-200 flex items-center justify-center mx-auto mb-1"><svg class="w-4 h-4 text-mental-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg></div><div class="text-sm font-medium text-warm-600 peer-checked:text-mental-700">Depression</div></div></label>
-                    <label class="block cursor-pointer"><input type="radio" name="concern_type" value="stress" class="peer hidden"><div class="p-3 rounded-xl border-2 border-warm-200 bg-white text-center peer-checked:border-mental-400 peer-checked:bg-mental-50 hover:border-warm-300 transition-all duration-200"><div class="w-8 h-8 rounded-lg bg-mental-100 border border-mental-200 flex items-center justify-center mx-auto mb-1"><svg class="w-4 h-4 text-mental-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div><div class="text-sm font-medium text-warm-600 peer-checked:text-mental-700">Stress</div></div></label>
-                    <label class="block cursor-pointer"><input type="radio" name="concern_type" value="ocd" class="peer hidden"><div class="p-3 rounded-xl border-2 border-warm-200 bg-white text-center peer-checked:border-mental-400 peer-checked:bg-mental-50 hover:border-warm-300 transition-all duration-200"><div class="w-8 h-8 rounded-lg bg-mental-100 border border-mental-200 flex items-center justify-center mx-auto mb-1"><svg class="w-4 h-4 text-mental-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg></div><div class="text-sm font-medium text-warm-600 peer-checked:text-mental-700">OCD-like thoughts</div></div></label>
-                    <label class="block cursor-pointer"><input type="radio" name="concern_type" value="social" class="peer hidden"><div class="p-3 rounded-xl border-2 border-warm-200 bg-white text-center peer-checked:border-mental-400 peer-checked:bg-mental-50 hover:border-warm-300 transition-all duration-200"><div class="w-8 h-8 rounded-lg bg-mental-100 border border-mental-200 flex items-center justify-center mx-auto mb-1"><svg class="w-4 h-4 text-mental-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div><div class="text-sm font-medium text-warm-600 peer-checked:text-mental-700">Social issues</div></div></label>
-                    <label class="block cursor-pointer"><input type="radio" name="concern_type" value="sleep" class="peer hidden"><div class="p-3 rounded-xl border-2 border-warm-200 bg-white text-center peer-checked:border-mental-400 peer-checked:bg-mental-50 hover:border-warm-300 transition-all duration-200"><div class="w-8 h-8 rounded-lg bg-mental-100 border border-mental-200 flex items-center justify-center mx-auto mb-1"><svg class="w-4 h-4 text-mental-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg></div><div class="text-sm font-medium text-warm-600 peer-checked:text-mental-700">Sleep problems</div></div></label>
-                    <label class="block cursor-pointer"><input type="radio" name="concern_type" value="trauma" class="peer hidden"><div class="p-3 rounded-xl border-2 border-warm-200 bg-white text-center peer-checked:border-mental-400 peer-checked:bg-mental-50 hover:border-warm-300 transition-all duration-200"><div class="w-8 h-8 rounded-lg bg-mental-100 border border-mental-200 flex items-center justify-center mx-auto mb-1"><svg class="w-4 h-4 text-mental-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg></div><div class="text-sm font-medium text-warm-600 peer-checked:text-mental-700">Past trauma</div></div></label>
-                    <label class="block cursor-pointer"><input type="radio" name="concern_type" value="unsure" class="peer hidden"><div class="p-3 rounded-xl border-2 border-warm-200 bg-white text-center peer-checked:border-mental-400 peer-checked:bg-mental-50 hover:border-warm-300 transition-all duration-200"><div class="w-8 h-8 rounded-lg bg-mental-100 border border-mental-200 flex items-center justify-center mx-auto mb-1"><svg class="w-4 h-4 text-mental-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><div class="text-sm font-medium text-warm-600 peer-checked:text-mental-700">Not sure</div></div></label>
+                <label class="block text-sm font-semibold text-warm-700 mb-3">What do you think might be going on? <span class="text-warm-400 font-normal">(pick all that apply)</span></label>
+                <div class="space-y-2">
+                    @php
+                    $concerns = [
+                        ['value' => 'anxiety', 'label' => 'Anxiety', 'desc' => 'Constant worry, racing thoughts, feeling on edge or panicky for no clear reason', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>'],
+                        ['value' => 'depression', 'label' => 'Depression', 'desc' => 'Persistent sadness, loss of interest, feeling empty or hopeless', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>'],
+                        ['value' => 'stress', 'label' => 'Stress / Burnout', 'desc' => 'Feeling overwhelmed, exhausted, or like you just can\'t keep up anymore', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>'],
+                        ['value' => 'ocd', 'label' => 'OCD-like thoughts', 'desc' => 'Intrusive, unwanted thoughts or urges that feel hard to control or dismiss', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>'],
+                        ['value' => 'social', 'label' => 'Social anxiety / issues', 'desc' => 'Discomfort around people, fear of judgment, avoiding social situations', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>'],
+                        ['value' => 'sleep', 'label' => 'Sleep problems', 'desc' => 'Can\'t fall asleep, can\'t stay asleep, or sleeping way too much', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>'],
+                        ['value' => 'trauma', 'label' => 'Past trauma', 'desc' => 'Something from the past that still affects you — flashbacks, nightmares, avoiding certain things', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>'],
+                        ['value' => 'unsure', 'label' => 'Not sure', 'desc' => 'Something feels off but you can\'t quite put your finger on it', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>'],
+                    ];
+                    @endphp
+                    @foreach($concerns as $concern)
+                    <label class="block cursor-pointer">
+                        <input type="checkbox" name="concern[]" value="{{ $concern['value'] }}" class="peer hidden" onchange="updateConcerns()">
+                        <div class="flex items-center gap-4 p-4 rounded-xl border-2 border-warm-200 bg-white peer-checked:border-mental-400 peer-checked:bg-mental-50 hover:border-warm-300 hover:bg-warm-50 transition-all duration-200">
+                            <div class="w-8 h-8 rounded-lg bg-mental-100 border border-mental-200 flex items-center justify-center shrink-0">
+                                <svg class="w-4 h-4 text-mental-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">{!! $concern['icon'] !!}</svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="font-semibold text-warm-800">{{ $concern['label'] }}</div>
+                                <div class="text-sm text-warm-500">{{ $concern['desc'] }}</div>
+                            </div>
+                            <div class="w-5 h-5 rounded-md border-2 border-mental-200 peer-checked:border-mental-500 shrink-0 flex items-center justify-center transition-colors">
+                                <svg class="w-3 h-3 text-mental-500 scale-0 peer-checked:scale-100 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                        </div>
+                    </label>
+                    @endforeach
                 </div>
             </div>
 
@@ -91,10 +110,13 @@
 </div>
 
 <script>
-    document.querySelectorAll('input[name="concern_type"]').forEach(radio => {
-        radio.addEventListener('change', () => {
-            document.querySelector('input[name="concern"]').value = radio.value;
-        });
+    // Require at least one checkbox
+    document.getElementById('mental-form').addEventListener('submit', function(e) {
+        const checked = document.querySelectorAll('input[name="concern[]"]:checked');
+        if (checked.length === 0) {
+            e.preventDefault();
+            alert('Please select at least one concern.');
+        }
     });
 </script>
 @endsection

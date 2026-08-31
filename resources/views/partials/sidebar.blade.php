@@ -40,16 +40,73 @@
                 Not sure?
             </a>
 
-            @if(Auth::user()->is_admin ?? false)
+            @php
+                $user = Auth::user();
+                $canSeeAdmin = false;
+                if ($user && $user->role && ($user->role->level >= 50 || in_array('settings.edit', $user->role->permissions ?? []))) {
+                    $canSeeAdmin = true;
+                }
+            @endphp
+
+            @if($canSeeAdmin)
+            @php
+                $adminPerms = $user->role->permissions ?? [];
+                $isSuperAdmin = $user->role->level >= 100;
+                $canUsers = $isSuperAdmin || in_array('users.view', $adminPerms);
+                $canScreenings = $isSuperAdmin || in_array('screenings.view', $adminPerms);
+                $canReports = $isSuperAdmin || in_array('reports.view', $adminPerms);
+                $canSettings = $isSuperAdmin || in_array('settings.edit', $adminPerms);
+                $canRoles = $isSuperAdmin || in_array('roles.manage', $adminPerms);
+            @endphp
             <div class="pt-4 pb-1 px-3">
                 <span class="text-[10px] font-semibold text-warm-400 uppercase tracking-wider">Admin</span>
             </div>
 
             <a href="{{ url('/admin') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
-                {{ str_starts_with($currentRoute, 'admin') ? 'bg-warm-800 text-white' : 'text-warm-500 hover:text-warm-700 hover:bg-warm-100' }}">
-                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                Admin Panel
+                {{ $currentRoute === 'admin.dashboard' ? 'bg-physical-100 text-physical-700' : 'text-warm-500 hover:text-warm-700 hover:bg-warm-100' }}">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                Dashboard
             </a>
+
+            @if($canUsers)
+            <a href="{{ url('/admin/users') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
+                {{ str_starts_with($currentRoute, 'admin.users') ? 'bg-physical-100 text-physical-700' : 'text-warm-500 hover:text-warm-700 hover:bg-warm-100' }}">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                Users
+            </a>
+            @endif
+
+            @if($canScreenings)
+            <a href="{{ url('/admin/screenings') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
+                {{ str_starts_with($currentRoute, 'admin.screenings') ? 'bg-physical-100 text-physical-700' : 'text-warm-500 hover:text-warm-700 hover:bg-warm-100' }}">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Screenings
+            </a>
+            @endif
+
+            @if($canReports)
+            <a href="{{ url('/admin/reports') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
+                {{ str_starts_with($currentRoute, 'admin.reports') ? 'bg-physical-100 text-physical-700' : 'text-warm-500 hover:text-warm-700 hover:bg-warm-100' }}">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                Reports
+            </a>
+            @endif
+
+            @if($canSettings)
+            <a href="{{ url('/admin/brand') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
+                {{ str_starts_with($currentRoute, 'admin.brand') ? 'bg-physical-100 text-physical-700' : 'text-warm-500 hover:text-warm-700 hover:bg-warm-100' }}">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
+                Brand Settings
+            </a>
+            @endif
+
+            @if($canRoles)
+            <a href="{{ url('/admin/permissions') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
+                {{ str_starts_with($currentRoute, 'admin.permissions') ? 'bg-physical-100 text-physical-700' : 'text-warm-500 hover:text-warm-700 hover:bg-warm-100' }}">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                Roles & Permissions
+            </a>
+            @endif
             @endif
         </nav>
 

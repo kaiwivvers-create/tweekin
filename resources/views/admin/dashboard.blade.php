@@ -1,4 +1,5 @@
-@extends('layouts.admin')
+@extends('layouts.app')
+@php $pageTitle = "Admin Panel" @endphp
 
 @section('content')
 <div class="space-y-8">

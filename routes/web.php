@@ -27,6 +27,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::post('/profile/avatar', [ProfileController::class, 'uploadAvatar'])->name('profile.avatar');
 });
 
 // Save screening result
@@ -106,6 +107,39 @@ Route::prefix('other')->name('other.')->group(function () {
         return view('other.results');
     })->name('results');
 });
+
+// AI Chat API
+Route::post('/api/chat', function (Request $request) {
+    $request->validate([
+        'message' => 'required|string|max:1000',
+        'history' => 'nullable|array',
+        'context' => 'required|array',
+    ]);
+
+    $gemini = new \App\Services\GeminiChatService();
+
+    if (!$gemini->isConfigured()) {
+        return response()->json([
+            'response' => null,
+            'error' => 'AI is not configured. An admin needs to add a Google AI API key in Brand Settings.',
+        ]);
+    }
+
+    $response = $gemini->chat(
+        $request->input('history', []),
+        $request->input('message'),
+        $request->input('context')
+    );
+
+    if ($response === null) {
+        return response()->json([
+            'response' => null,
+            'error' => 'Could not get a response. Please try again.',
+        ]);
+    }
+
+    return response()->json(['response' => $response]);
+})->name('api.chat');
 
 // Auth routes (Breeze)
 require __DIR__.'/auth.php';

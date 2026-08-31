@@ -3,7 +3,7 @@
 @section('content')
 <div class="w-full flex">
     {{-- Sidebar with vertical progress --}}
-    <div class="hidden lg:flex w-24 shrink-0 border-r border-warm-200 bg-white/50 py-12 justify-center sticky top-14 h-[calc(100vh-3.5rem)]">
+    <div class="hidden lg:flex w-24 shrink-0 border-r border-physical-100 bg-physical-50/30 py-12 justify-center sticky top-14 h-[calc(100vh-3.5rem)]">
         @include('components.vertical-progress', ['steps' => ['Category', 'Questions', 'Results'], 'current' => 2, 'theme' => 'physical'])
     </div>
 
@@ -26,17 +26,50 @@
         <div class="mb-8 animate-fade-in">
             <h1 class="font-display font-bold text-2xl sm:text-3xl text-warm-800 mb-2">Tell us more</h1>
             <p class="text-warm-500 leading-relaxed">
-                @if(request('symptom') === 'unsure')
+                @if(in_array('unsure', (array) request('symptom', [])))
                     Answer what you can — we'll use this to help figure out what's going on.
                 @else
-                    Based on your selection, here are some questions to help narrow things down.
+                    Here's what you selected. Let's dig a bit deeper.
                 @endif
             </p>
         </div>
 
-        <form id="physical-questions-form" action="{{ route('physical.results') }}" method="GET" class="space-y-8">
-            <input type="hidden" name="symptom" value="{{ request('symptom') }}">
+        {{-- Selected symptoms summary --}}
+        @php
+            $selectedSymptoms = (array) request('symptom', []);
+            $symptomLabels = [
+                'fever' => 'Fever or chills',
+                'pain' => 'Pain or discomfort',
+                'skin' => 'Skin issues',
+                'respiratory' => 'Breathing issues',
+                'digestive' => 'Stomach or digestion',
+                'fatigue' => 'Fatigue or energy',
+                'other' => 'Something else',
+                'unsure' => 'Not sure',
+            ];
+        @endphp
+        <div class="bg-physical-50 border border-physical-200 rounded-2xl p-5 mb-8 animate-fade-in" style="animation-delay: 0.05s;">
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="text-sm font-semibold text-physical-700">Your selections</h2>
+                <a href="{{ route('physical.index') }}" class="text-xs text-physical-500 hover:text-physical-700 underline transition-colors">Change</a>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                @foreach($selectedSymptoms as $symptom)
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-physical-200 text-sm text-physical-700 font-medium">
+                        <svg class="w-3.5 h-3.5 text-physical-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        {{ $symptomLabels[$symptom] ?? ucfirst(str_replace('-', ' ', $symptom)) }}
+                    </span>
+                @endforeach
+            </div>
+        </div>
 
+        <form id="physical-questions-form" action="{{ route('physical.results') }}" method="GET" class="space-y-8">
+            {{-- Pass symptoms through --}}
+            @foreach($selectedSymptoms as $s)
+            <input type="hidden" name="symptom[]" value="{{ $s }}">
+            @endforeach
+
+            {{-- Duration --}}
             <div class="animate-fade-in" style="animation-delay: 0.1s;">
                 <label class="block text-sm font-semibold text-warm-700 mb-3">How long have you been dealing with this?</label>
                 <div class="grid grid-cols-2 gap-2">
@@ -47,30 +80,24 @@
                 </div>
             </div>
 
+            {{-- Severity --}}
             <div class="animate-fade-in" style="animation-delay: 0.2s;">
                 <label class="block text-sm font-semibold text-warm-700 mb-3">How would you rate the severity?</label>
                 <div class="flex gap-2">
                     @php
                     $severities = [
-                        ['value' => '1', 'label' => 'Mild'],
-                        ['value' => '2', 'label' => 'Moderate'],
-                        ['value' => '3', 'label' => 'Uncomfortable'],
-                        ['value' => '4', 'label' => 'Severe'],
-                        ['value' => '5', 'label' => 'Intense'],
+                        ['value' => '1', 'label' => 'Mild', 'color' => 'bg-success/30'],
+                        ['value' => '2', 'label' => 'Moderate', 'color' => 'bg-success/50'],
+                        ['value' => '3', 'label' => 'Uncomfortable', 'color' => 'bg-warning/50'],
+                        ['value' => '4', 'label' => 'Severe', 'color' => 'bg-warning/70'],
+                        ['value' => '5', 'label' => 'Intense', 'color' => 'bg-danger/50'],
                     ];
                     @endphp
                     @foreach($severities as $s)
                     <label class="flex-1 block cursor-pointer">
                         <input type="radio" name="severity" value="{{ $s['value'] }}" class="peer hidden" required>
                         <div class="p-2 sm:p-3 rounded-xl border-2 border-warm-200 bg-white text-center peer-checked:border-physical-400 peer-checked:bg-physical-50 hover:border-warm-300 transition-all duration-200">
-                            <div class="w-6 h-6 rounded-full mx-auto mb-1
-                                @if($s['value'] == '1') bg-success/30
-                                @elseif($s['value'] == '2') bg-success/50
-                                @elseif($s['value'] == '3') bg-warning/50
-                                @elseif($s['value'] == '4') bg-warning/70
-                                @else bg-danger/50
-                                @endif
-                            "></div>
+                            <div class="w-6 h-6 rounded-full mx-auto mb-1 {{ $s['color'] }}"></div>
                             <div class="text-xs font-medium text-warm-600 peer-checked:text-physical-700">{{ $s['label'] }}</div>
                         </div>
                     </label>
@@ -78,8 +105,9 @@
                 </div>
             </div>
 
+            {{-- Additional symptoms checklist --}}
             <div class="animate-fade-in" style="animation-delay: 0.3s;">
-                <label class="block text-sm font-semibold text-warm-700 mb-3">Check any that apply:</label>
+                <label class="block text-sm font-semibold text-warm-700 mb-3">Check any other symptoms that apply:</label>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     @php
                     $symptomsList = [
@@ -88,13 +116,13 @@
                         ['value' => 'nausea', 'label' => 'Nausea', 'tip' => 'That uneasy, queasy feeling in your stomach — like you might throw up'],
                         ['value' => 'dizziness', 'label' => 'Dizziness', 'tip' => 'Feeling lightheaded, unsteady, or like the room is spinning'],
                         ['value' => 'fatigue', 'label' => 'Fatigue', 'tip' => 'Being really tired even after sleeping — not just normal tiredness'],
-                        ['value' => 'sweating', 'label' => 'Sweating', 'tip' => 'Sweating more than usual, or sweating when you normally wouldn\'t'],
+                        ['value' => 'sweating', 'label' => 'Sweating', 'tip' => "Sweating more than usual, or sweating when you normally wouldn't"],
                         ['value' => 'loss-of-appetite', 'label' => 'Loss of appetite', 'tip' => 'Not feeling hungry at all, or feeling turned off by food'],
                         ['value' => 'swelling', 'label' => 'Swelling', 'tip' => 'An area of your body looking puffy or bigger than usual'],
                         ['value' => 'redness', 'label' => 'Redness', 'tip' => 'Skin that looks pink, red, or inflamed in a specific area'],
-                        ['value' => 'discharge', 'label' => 'Discharge', 'tip' => 'Any fluid or substance coming from a wound, eye, ear, or other area that isn\'t blood'],
-                        ['value' => 'breathing', 'label' => 'Difficulty breathing', 'tip' => 'Feeling like you can\'t get enough air, or breathing feels harder than usual'],
-                        ['value' => 'none', 'label' => 'None of the above', 'tip' => 'I\'m not experiencing any of these specific symptoms'],
+                        ['value' => 'discharge', 'label' => 'Discharge', 'tip' => "Any fluid or substance coming from a wound, eye, ear, or other area that isn't blood"],
+                        ['value' => 'breathing', 'label' => 'Difficulty breathing', 'tip' => "Feeling like you can't get enough air, or breathing feels harder than usual"],
+                        ['value' => 'none', 'label' => 'None of the above', 'tip' => "I'm not experiencing any of these specific symptoms"],
                     ];
                     @endphp
                     @foreach($symptomsList as $s)
@@ -120,6 +148,7 @@
                 </div>
             </div>
 
+            {{-- Additional notes --}}
             <div class="animate-fade-in" style="animation-delay: 0.4s;">
                 <label for="additional-info" class="block text-sm font-semibold text-warm-700 mb-2">Anything else you want to add? (optional)</label>
                 <textarea id="additional-info" name="additional_info" rows="3" placeholder="e.g., 'I also started a new medication last week' or 'This happened after I ate something'" class="w-full px-4 py-3 rounded-xl border-2 border-warm-200 bg-white text-warm-800 placeholder-warm-400 focus:border-physical-400 focus:ring-0 resize-none transition-colors"></textarea>
@@ -154,7 +183,6 @@
             const tip = btn.getAttribute('data-tip');
             tipText.textContent = tip;
             tipTooltip.classList.remove('hidden');
-            // Scroll tooltip into view
             tipTooltip.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         });
     });

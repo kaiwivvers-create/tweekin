@@ -1,0 +1,80 @@
+@media print {
+    /* Hide everything except the results */
+    header, nav, .sidebar, footer, [x-cloak],
+    button:not(.print-keep), .no-print, #modal-container,
+    #avatar-cropper-modal, .ai-conclusion-section,
+    .action-buttons, .disclaimer-bar {
+        display: none !important;
+    }
+
+    body {
+        background: white !important;
+        color: #1a1a1a !important;
+        font-size: 11pt;
+        line-height: 1.5;
+    }
+
+    main {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .print-container {
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .print-header {
+        display: block !important;
+        text-align: center;
+        padding-bottom: 16pt;
+        border-bottom: 2pt solid #e5e5e5;
+        margin-bottom: 16pt;
+    }
+
+    .print-header h1 {
+        font-size: 18pt;
+        margin: 0 0 4pt;
+    }
+
+    .print-header p {
+        font-size: 9pt;
+        color: #666;
+        margin: 0;
+    }
+
+    .print-footer {
+        display: block !important;
+        margin-top: 24pt;
+        padding-top: 12pt;
+        border-top: 1pt solid #e5e5e5;
+        font-size: 8pt;
+        color: #999;
+        text-align: center;
+    }
+
+    /* Ensure cards render properly */
+    .bg-white {
+        background: white !important;
+        border: 1pt solid #e5e5e5 !important;
+        box-shadow: none !important;
+        break-inside: avoid;
+    }
+
+    /* Remove animations and transitions */
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+
+    /* Links should show URL */
+    a[href]:after {
+        content: none !important;
+    }
+
+    /* Severity badges */
+    .severity-badge {
+        border: 1pt solid currentColor;
+    }
+}

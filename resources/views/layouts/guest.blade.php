@@ -26,10 +26,13 @@
     </style>
 </head>
 <body class="min-h-screen flex bg-warm-50 text-warm-800 font-sans">
+    <script>
+        if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
+    </script>
 
     @php
         $isLogin = request()->is('login');
-        $appName = config('app.name', 'Tweek');
+        $appName = $brand['name'] ?? config('app.name', 'Tweek');
     @endphp
 
     {{-- Left side: Decorative illustration --}}
@@ -53,10 +56,14 @@
         <div class="relative z-10 w-full max-w-md px-12">
             {{-- Main logo --}}
             <div class="float mb-8">
-                <div class="w-24 h-24 rounded-3xl bg-white/80 backdrop-blur-sm border border-warm-200/50 shadow-xl flex items-center justify-center mx-auto">
-                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 via-white to-sky-400 flex items-center justify-center">
-                        <span class="text-warm-800 font-bold text-2xl">T</span>
-                    </div>
+                <div class="w-24 h-24 rounded-3xl bg-white/80 backdrop-blur-sm border border-warm-200/50 shadow-xl flex items-center justify-center mx-auto overflow-hidden">
+                    @if($brand['logo_path'] ?? '')
+                        <img src="{{ Storage::disk('public')->url($brand['logo_path']) }}" alt="Logo" class="w-full h-full object-cover">
+                    @else
+                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 via-white to-sky-400 flex items-center justify-center">
+                            <span class="text-warm-800 font-bold text-2xl">T</span>
+                        </div>
+                    @endif
                 </div>
             </div>
 
@@ -143,9 +150,13 @@
         {{-- Top bar --}}
         <div class="h-14 px-6 sm:px-8 flex items-center justify-between border-b border-warm-200/60">
             <a href="{{ route('home') }}" class="flex items-center gap-2.5 group lg:hidden">
-                <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-400 via-white to-sky-400 flex items-center justify-center shadow-sm border border-warm-200">
-                    <span class="text-warm-800 font-bold text-xs">T</span>
-                </div>
+                @if($brand['logo_path'] ?? '')
+                    <img src="{{ Storage::disk('public')->url($brand['logo_path']) }}" alt="Logo" class="w-7 h-7 rounded-lg object-cover shadow-sm border border-warm-200">
+                @else
+                    <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-400 via-white to-sky-400 flex items-center justify-center shadow-sm border border-warm-200">
+                        <span class="text-warm-800 font-bold text-xs">T</span>
+                    </div>
+                @endif
                 <span class="font-display font-bold text-base text-warm-800 tracking-tight">{{ $appName }}</span>
             </a>
             <div class="hidden lg:block"></div>

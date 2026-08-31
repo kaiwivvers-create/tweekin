@@ -14,7 +14,12 @@ class AdminMiddleware
             return redirect()->route('login');
         }
 
-        if (!auth()->user()->is_admin) {
+        $user = auth()->user();
+        $role = $user->role;
+
+        // Allow if role level >= 50 (admin or super admin)
+        // Or if the role has settings.edit permission
+        if (!$role || ($role->level < 50 && !in_array('settings.edit', $role->permissions ?? []))) {
             abort(403, 'Unauthorized. Admin access required.');
         }
 

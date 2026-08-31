@@ -25,6 +25,45 @@
         </div>
     </div>
 
+    {{-- Weekly activity --}}
+    @php
+        $weeklyData = $screenings->filter(function ($s) {
+            return $s->created_at->isAfter(now()->subWeek());
+        })->groupBy(function ($s) {
+            return $s->created_at->format('D');
+        });
+        $days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        $maxWeek = max(array_merge([1], array_map(fn($d) => $weeklyData[$d]->count(), array_filter($days, fn($d) => isset($weeklyData[$d])))));
+    @endphp
+
+    @if($counts['total'] > 0)
+    <div class="bg-white rounded-2xl border border-warm-200 p-6 mb-10">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="font-display font-bold text-lg text-warm-800">This week</h2>
+            @php
+                $thisWeekCount = $screenings->filter(fn($s) => $s->created_at->isAfter(now()->subWeek()))->count();
+                $lastWeekCount = $screenings->filter(fn($s) => $s->created_at->isBetween(now()->subWeeks(2), now()->subWeek()))->count();
+            @endphp
+            @if($lastWeekCount > 0)
+                @php $trend = round((($thisWeekCount - $lastWeekCount) / $lastWeekCount) * 100); @endphp
+                <span class="text-xs font-semibold px-2 py-0.5 rounded-full {{ $trend >= 0 ? 'bg-physical-100 text-physical-700' : 'bg-mental-100 text-mental-700' }}">
+                    {{ $trend >= 0 ? '+' : '' }}{{ $trend }}% vs last week
+                </span>
+            @endif
+        </div>
+        <div class="flex items-end gap-2 h-28">
+            @foreach($days as $day)
+                @php $count = isset($weeklyData[$day]) ? $weeklyData[$day]->count() : 0; @endphp
+                <div class="flex-1 flex flex-col items-center gap-1">
+                    <div class="w-full rounded-lg transition-all {{ $count > 0 ? 'bg-gradient-to-t from-mental-400 to-mental-300' : 'bg-warm-100' }}"
+                         style="height: {{ $count > 0 ? max(8, ($count / $maxWeek) * 100) : 4 }}%"></div>
+                    <span class="text-[10px] font-medium text-warm-400">{{ substr($day, 0, 1) }}</span>
+                </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
     {{-- Quick actions --}}
     <h2 class="font-display font-bold text-xl text-warm-800 mb-4">Start a new screening</h2>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
@@ -58,7 +97,12 @@
     </div>
 
     {{-- Screening history --}}
-    <h2 class="font-display font-bold text-xl text-warm-800 mb-4">Recent screenings</h2>
+    <div class="flex items-center justify-between mb-4">
+        <h2 class="font-display font-bold text-xl text-warm-800">Recent screenings</h2>
+        @if($screenings->count() > 5)
+            <span class="text-xs text-warm-400">{{ $screenings->count() }} total</span>
+        @endif
+    </div>
 
     @if($screenings->count() > 0)
         <div class="space-y-3">
@@ -105,6 +149,19 @@
             </a>
         </div>
     @endif
+
+    {{-- Wellness tip --}}
+    <div class="mt-10 bg-gradient-to-br from-mental-50 to-physical-50 rounded-2xl border border-mental-200/50 p-6">
+        <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-lg bg-mental-200 flex items-center justify-center shrink-0 mt-0.5">
+                <svg class="w-4 h-4 text-mental-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+            </div>
+            <div>
+                <h3 class="font-display font-bold text-warm-800 text-sm mb-1">Wellness tip</h3>
+                <p class="text-sm text-warm-600 leading-relaxed">Regular check-ins with yourself — even quick ones — can help you notice patterns you might otherwise miss. You're already doing that by being here.</p>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
 

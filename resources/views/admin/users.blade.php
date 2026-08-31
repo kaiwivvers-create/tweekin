@@ -1,4 +1,5 @@
-@extends('layouts.admin')
+@extends('layouts.app')
+@php $pageTitle = "Admin Panel" @endphp
 
 @section('content')
 <div class="space-y-6">
@@ -35,9 +36,11 @@
                         <td class="px-6 py-4">
                             <form method="POST" action="{{ route('admin.users.role', $user) }}" class="inline">
                                 @csrf
-                                <select name="role_id" onchange="this.form.submit()" class="text-xs px-2 py-1 rounded-lg border border-warm-200 bg-white text-warm-600 focus:border-mental-400 focus:ring-0">
+                                <select name="role_id" onchange="this.form.submit()" class="text-xs px-2 py-1 rounded-lg border border-warm-200 bg-white text-warm-600 focus:border-mental-400 focus:ring-0"
+                                    {{ (!$isSuperAdmin && $user->role && $user->role->level >= 100) ? 'disabled' : '' }}>
                                     <option value="">No role</option>
                                     @foreach(\App\Models\Role::all() as $role)
+                                        @if(!$isSuperAdmin && $role->level >= 100)@continue @endif
                                         <option value="{{ $role->id }}" {{ $user->role_id === $role->id ? 'selected' : '' }}>{{ $role->label }}</option>
                                     @endforeach
                                 </select>
