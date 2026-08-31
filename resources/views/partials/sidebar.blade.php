@@ -2,7 +2,7 @@
     $currentRoute = request()->route()->getName();
 @endphp
 
-<aside class="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:top-14 lg:border-r lg:border-warm-200 lg:bg-white/60 lg:backdrop-blur-sm z-30">
+<aside class="app-sidebar hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:top-14 lg:border-r lg:border-warm-200 lg:bg-white/60 lg:backdrop-blur-sm z-30">
     <div class="flex flex-col flex-1 pt-6 pb-4 overflow-y-auto">
         {{-- Navigation --}}
         <nav class="flex-1 px-3 space-y-1">

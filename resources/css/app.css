@@ -313,6 +313,12 @@ label:has(input[type="radio"]:checked) > div {
 /* Brand preview boxes */
 .dark .bg-warm-100.font-display { background-color: #2a2826 !important; }
 
+/* Sidebar */
+.dark .app-sidebar { background-color: #151413 !important; backdrop-filter: none !important; border-right-color: #2a2826 !important; }
+.dark .app-sidebar a:not(.bg-mental-100):not(.bg-physical-100):not(.bg-other-100):hover { background-color: #1c1b19 !important; }
+.dark .app-sidebar .text-warm-400 { color: #706d67 !important; }
+.dark .app-sidebar .text-warm-500 { color: #a8a49e !important; }
+
 /* Disclaimer bar */
 .dark .disclaimer-bar { background-color: #181614 !important; border-bottom-color: #2a2826 !important; color: #a8a49e !important; }
 .dark .disclaimer-bar .text-mental-400 { color: #7cb8ff !important; }

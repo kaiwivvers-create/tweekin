@@ -288,7 +288,7 @@
     document.addEventListener('DOMContentLoaded', () => {
         const data = {
             type: 'physical',
-            title: @json(implode(', ', array_map(fn($s) => ucfirst(str_replace('-', ' ', $s)), (array) request('symptom', ['Unknown'])))),
+            title: @json(implode(', ', array_map(function($s) { return ucfirst(str_replace('-', ' ', $s)); }, (array) request('symptom', ['Unknown'])))),
             data: {
                 symptom: @json((array) request('symptom', [])),
                 duration: @json(request('duration')),
