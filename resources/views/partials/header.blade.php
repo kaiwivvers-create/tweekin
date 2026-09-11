@@ -26,7 +26,8 @@
 
         {{-- Right: Desktop nav --}}
         <div class="hidden sm:flex items-center gap-4">
-            <button @click="dark = !dark" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-warm-100 transition-colors" :title="dark ? 'Switch to light mode' : 'Switch to dark mode'">
+            {{-- Dark mode toggle (hidden for now) --}}
+            <button @click="dark = !dark" class="hidden w-8 h-8 items-center justify-center rounded-lg hover:bg-warm-100 transition-colors" :title="dark ? 'Switch to light mode' : 'Switch to dark mode'">
                 <svg x-show="!dark" class="w-4 h-4 text-warm-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
                 <svg x-show="dark" x-cloak class="w-4 h-4 text-mental-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
             </button>
@@ -34,6 +35,10 @@
 
             @auth
                 <a href="{{ url('/dashboard') }}" class="text-sm font-medium text-warm-500 hover:text-warm-700 transition-colors">Dashboard</a>
+                <a href="{{ route('notifications.index') }}" class="relative w-8 h-8 flex items-center justify-center rounded-lg hover:bg-warm-100 transition-colors" title="Notifications">
+                    <svg class="w-4 h-4 text-warm-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                    <span id="notif-badge" class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-danger text-white text-[9px] font-bold rounded-full flex items-center justify-center hidden">0</span>
+                </a>
                 <form method="POST" action="{{ route('logout') }}" class="inline">
                     @csrf
                     <button type="submit" class="text-sm font-medium text-warm-500 hover:text-warm-700 transition-colors">Log out</button>
@@ -62,7 +67,7 @@
          x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2"
          @click.outside="open = false"
          class="sm:hidden border-t border-warm-100 bg-white px-6 py-3 space-y-1">
-        <button @click="dark = !dark" class="flex items-center gap-2 w-full py-2 text-sm font-medium text-warm-600 hover:text-warm-800 rounded-lg hover:bg-warm-50 transition-colors">
+        <button @click="dark = !dark" class="hidden items-center gap-2 w-full py-2 text-sm font-medium text-warm-600 hover:text-warm-800 rounded-lg hover:bg-warm-50 transition-colors">
             <svg x-show="!dark" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
             <svg x-show="dark" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
             <span x-text="dark ? 'Light mode' : 'Dark mode'"></span>
@@ -85,4 +90,24 @@
             @endif
         @endauth
     </div>
+
+    @auth
+    <script>
+        (function() {
+            var badge = document.getElementById('notif-badge');
+            if (!badge) return;
+            fetch('{{ route('notifications.unreadCount') }}', {
+                headers: { 'Accept': 'application/json' }
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.count > 0) {
+                    badge.textContent = data.count > 9 ? '9+' : data.count;
+                    badge.classList.remove('hidden');
+                }
+            })
+            .catch(function() {});
+        })();
+    </script>
+    @endauth
 </header>

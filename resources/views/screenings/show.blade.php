@@ -199,6 +199,15 @@
         <a href="{{ url('/dashboard') }}" class="flex-1 py-3 px-6 rounded-xl border-2 border-warm-200 text-warm-600 font-semibold text-center hover:bg-warm-50 transition-colors">
             Back to dashboard
         </a>
+        @auth
+        <form action="{{ route('compare.show') }}" method="POST" class="flex-1">
+            @csrf
+            <input type="hidden" name="screenings[]" value="{{ $screening->id }}">
+            <button type="submit" class="w-full py-3 px-6 rounded-xl border-2 border-mental-200 text-mental-600 font-semibold text-center hover:bg-mental-50 transition-colors">
+                Compare with another
+            </button>
+        </form>
+        @endauth
         <a href="{{ route(strtolower($screening->type) . '.index') }}" class="flex-1 py-3 px-6 rounded-xl bg-warm-800 hover:bg-warm-700 text-white font-semibold text-center transition-colors">
             Start new screening
         </a>

@@ -47,8 +47,15 @@
                 </svg>
             </div>
             <div class="bg-warm-100 rounded-2xl rounded-tl-md p-4 max-w-[85%]">
+                @php $ventConcerns = (array) request('concern', []); @endphp
                 <p class="text-sm text-warm-700 leading-relaxed">
-                    I've been thinking about <span class="font-semibold text-mental-600">{{ ucfirst(str_replace('-', ' ', request('concern', 'how I've been feeling'))) }}</span>.
+                    I've been thinking about <span class="font-semibold text-mental-600">
+                        @if(count($ventConcerns) > 0)
+                            {{ collect($ventConcerns)->map(fn($c) => ucfirst(str_replace('-', ' ', $c)))->implode(', ') }}
+                        @else
+                            how I've been feeling
+                        @endif
+                    </span>.
                     @if(request('why_thinking'))
                         <br><span class="text-warm-500">"{{ request('why_thinking') }}"</span>
                     @endif

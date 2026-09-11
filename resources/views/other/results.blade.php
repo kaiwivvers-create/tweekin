@@ -82,6 +82,14 @@
         </div>
     </div>
 
+    {{-- Educational breakdown --}}
+    @include('components.educational-breakdown', [
+        'type' => 'other',
+        'concerns' => [request('lean', 'general')],
+        'duration' => request('duration'),
+        'severity' => null,
+    ])
+
     {{-- AI Conclusion Chat --}}
     @include('components.ai-conclusion', [
         'context' => [
@@ -132,7 +140,11 @@
                 'Accept': 'application/json'
             },
             body: JSON.stringify(data)
-        }).catch(() => {});
+        }).then(function(res) {
+            if (!res.ok) console.error('Screening save failed:', res.status);
+        }).catch(function(err) {
+            console.error('Screening save error:', err);
+        });
     });
 </script>
 @endsection

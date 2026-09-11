@@ -39,8 +39,6 @@
 
     {{-- Chat-like interface --}}
     <div id="chat-container" class="space-y-4 mb-6">
-
-        {{-- User's input summary --}}
         <div class="flex gap-3 animate-fade-in">
             <div class="w-8 h-8 rounded-full bg-warm-200 flex items-center justify-center shrink-0">
                 <svg class="w-4 h-4 text-warm-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -62,90 +60,77 @@
                 </p>
             </div>
         </div>
-
-        {{-- AI Response placeholder --}}
-        <div class="flex gap-3 animate-fade-in" style="animation-delay: 0.2s;">
-            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-mental-300 to-mental-500 flex items-center justify-center shrink-0">
-                <span class="text-white font-bold text-xs">T</span>
-            </div>
-            <div class="bg-mental-50 border border-mental-200 rounded-2xl rounded-tl-md p-4 max-w-[85%]">
-                <div class="text-sm text-mental-700 leading-relaxed space-y-3">
-                    <p>Thanks for sharing that. Here are a few things worth considering:</p>
-
-                    <div class="bg-white rounded-xl p-3 border border-mental-100">
-                        <p class="font-semibold text-mental-600 mb-1">What you described</p>
-                        <p>The patterns you're noticing are valid reasons to look into this further. Whether it turns out to be what you think or something else entirely, paying attention to how you feel is always a good first step.</p>
-                    </div>
-
-                    <div class="bg-white rounded-xl p-3 border border-mental-100">
-                        <p class="font-semibold text-mental-600 mb-1">Some perspective</p>
-                        <p>Online content can be helpful for understanding yourself, but it's easy to see yourself in every description you read. A professional can help you sort through what's real and what might be coincidence.</p>
-                    </div>
-
-                    <div class="bg-white rounded-xl p-3 border border-mental-100">
-                        <p class="font-semibold text-mental-600 mb-1">What we'd suggest</p>
-                        <p>This seems like something worth taking to a professional — not because it's necessarily serious, but because having an expert's perspective can give you clarity and peace of mind.</p>
-                    </div>
-
-                    <p class="text-xs text-warm-400 italic pt-2">Remember: this is general information, not a diagnosis. Only a trained professional can properly evaluate what you're experiencing.</p>
-                </div>
-            </div>
-        </div>
-
     </div>
 
-    {{-- Specialist recommendations --}}
-    @php
-        $concerns = (array) request('concern', []);
-        $specialists = [];
-        if (in_array('anxiety', $concerns)) {
-            $specialists[] = ['name' => 'Anxiety & Stress Specialist', 'specialty' => 'Worry, panic, and physical tension', 'expect' => 'Talking through triggers, learning coping tools', 'tip' => 'Write down your top 3 worries before your session'];
-        }
-        if (in_array('depression', $concerns)) {
-            $specialists[] = ['name' => 'Depression & Mood Counselor', 'specialty' => 'Persistent sadness, low energy, withdrawal', 'expect' => 'Mood assessment, goal-setting, therapy options', 'tip' => 'There is no wrong way to feel — be honest about what you share'];
-        }
-        if (in_array('stress', $concerns)) {
-            $specialists[] = ['name' => 'Burnout & Stress Coach', 'specialty' => 'Overwhelm, exhaustion, work-life balance', 'expect' => 'Lifestyle review, boundary-setting strategies', 'tip' => 'Note which parts of your day feel heaviest'];
-        }
-        if (in_array('ocd', $concerns)) {
-            $specialists[] = ['name' => 'OCD & Intrusive Thoughts', 'specialty' => 'Repetitive thoughts and compulsive behaviors', 'expect' => 'Thought pattern review, ERP therapy overview', 'tip' => 'Try not to fight the thoughts — observe them without acting'];
-        }
-        if (in_array('social', $concerns)) {
-            $specialists[] = ['name' => 'Social Anxiety Therapist', 'specialty' => 'Discomfort in social situations, fear of judgment', 'expect' => 'Gradual exposure planning, confidence-building', 'tip' => 'Start small — one low-pressure social interaction at a time'];
-        }
-        if (in_array('sleep', $concerns)) {
-            $specialists[] = ['name' => 'Sleep & Insomnia Clinic', 'specialty' => 'Difficulty falling or staying asleep', 'expect' => 'Sleep diary review, hygiene tips, CBT-I options', 'tip' => 'Track your sleep for a week before your appointment'];
-        }
-        if (in_array('trauma', $concerns)) {
-            $specialists[] = ['name' => 'Trauma-Informed Therapist', 'specialty' => 'Past experiences affecting your present', 'expect' => 'Safe space to process, EMDR or CPT options', 'tip' => 'Go at your own pace — you are in control of what you share'];
-        }
-        if (empty($specialists)) {
-            $specialists[] = ['name' => 'Licensed Therapist', 'specialty' => 'General mental health and self-understanding', 'expect' => 'Open conversation, coping strategies, referrals', 'tip' => 'Come as you are — no preparation needed'];
-        }
-        $specialists[] = ['name' => 'Your Primary Care Doctor', 'specialty' => 'General health check, medication options, referrals', 'expect' => 'Brief screening, blood work if needed', 'tip' => 'Mention your mental health concerns alongside physical ones'];
-    @endphp
+    {{-- AI-generated sections container --}}
+    <div id="ai-sections" class="space-y-6 mb-6">
 
-    <div class="bg-white rounded-2xl border border-warm-200 p-5 mb-6 animate-fade-in" style="animation-delay: 0.3s;">
-        <h2 class="font-semibold text-warm-800 mb-2">Recommended support</h2>
-        <p class="text-sm text-warm-500 mb-4">These specialists can help with what you described:</p>
-        <div class="flex gap-4 overflow-x-auto pb-3 snap-x snap-mandatory scroll-smooth" style="scrollbar-width: none;">
-            @foreach($specialists as $s)
-            <div class="snap-start shrink-0 w-72 bg-mental-50/50 rounded-2xl border border-mental-200 p-4">
-                <h3 class="font-semibold text-warm-800 mb-1">{{ $s['name'] }}</h3>
-                <p class="text-xs text-warm-500 mb-3">{{ $s['specialty'] }}</p>
-                <div class="space-y-2 text-xs">
-                    <div class="flex items-start gap-1.5">
-                        <svg class="w-3.5 h-3.5 text-mental-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                        <span class="text-warm-600">{{ $s['expect'] }}</span>
-                    </div>
-                    <div class="flex items-start gap-1.5">
-                        <svg class="w-3.5 h-3.5 text-physical-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        <span class="text-warm-500">{{ $s['tip'] }}</span>
-                    </div>
+        @php $loadingSpinner = '<div class="flex flex-col items-center justify-center py-8 gap-3"><div class="relative w-12 h-12"><div class="absolute inset-0 rounded-full border-[3px] border-mental-200 border-t-mental-500 animate-spin" style="animation-duration: 0.9s;"></div><div class="absolute inset-1 rounded-full border-[3px] border-physical-200 border-b-physical-500 animate-spin" style="animation-duration: 1.2s; animation-direction: reverse;"></div></div><p class="text-xs text-warm-400 font-medium">Generating your results...</p></div>'; @endphp
+
+        <div id="section-patterns" class="bg-white rounded-2xl border border-warm-200 overflow-hidden animate-fade-in" style="animation-delay: 0.1s;">
+            <div class="p-5 border-b border-warm-100 bg-mental-50/30">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-mental-100 border border-mental-200 flex items-center justify-center shrink-0"><svg class="w-4 h-4 text-mental-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg></div>
+                    <h2 class="font-display font-bold text-lg text-warm-800">What this pattern often involves</h2>
                 </div>
             </div>
-            @endforeach
+            <div class="p-5 ai-section-content">{!! $loadingSpinner !!}</div>
         </div>
+
+        <div id="section-strategies" class="bg-white rounded-2xl border border-warm-200 overflow-hidden animate-fade-in" style="animation-delay: 0.15s;">
+            <div class="p-5 border-b border-warm-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-success/15 flex items-center justify-center shrink-0"><svg class="w-4 h-4 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+                    <h2 class="font-display font-bold text-lg text-warm-800">Practical strategies</h2>
+                </div>
+            </div>
+            <div class="p-5 ai-section-content">{!! $loadingSpinner !!}</div>
+        </div>
+
+        <div id="section-what-to-tell" class="bg-white rounded-2xl border border-warm-200 overflow-hidden animate-fade-in" style="animation-delay: 0.2s;">
+            <div class="p-5 border-b border-warm-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-mental-100 border border-mental-200 flex items-center justify-center shrink-0"><svg class="w-4 h-4 text-mental-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg></div>
+                    <h2 class="font-display font-bold text-lg text-warm-800">What to tell a professional</h2>
+                </div>
+            </div>
+            <div class="p-5 ai-section-content">{!! $loadingSpinner !!}</div>
+        </div>
+
+        <div id="section-correlation" class="bg-white rounded-2xl border border-warm-200 overflow-hidden animate-fade-in" style="animation-delay: 0.25s;">
+            <div class="p-5 border-b border-warm-100 bg-mental-50/30">
+                <div class="flex items-center gap-3 mb-1">
+                    <div class="w-8 h-8 rounded-lg bg-mental-100 border border-mental-200 flex items-center justify-center shrink-0"><svg class="w-4 h-4 text-mental-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg></div>
+                    <h2 class="font-display font-bold text-lg text-warm-800">How your symptoms relate to each other</h2>
+                </div>
+                <p class="text-xs text-warm-500 leading-relaxed">This is a <strong>comparison of patterns</strong> — not a diagnosis.</p>
+            </div>
+            <div class="p-5 ai-section-content">{!! $loadingSpinner !!}</div>
+        </div>
+
+        <div id="section-specialists" class="bg-white rounded-2xl border border-warm-200 overflow-hidden animate-fade-in" style="animation-delay: 0.3s;">
+            <div class="p-5 border-b border-warm-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-mental-100 border border-mental-200 flex items-center justify-center shrink-0"><svg class="w-4 h-4 text-mental-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg></div>
+                    <h2 class="font-display font-bold text-lg text-warm-800">Recommended support</h2>
+                </div>
+            </div>
+            <div class="p-5 ai-section-content">{!! $loadingSpinner !!}</div>
+        </div>
+
+        {{-- Nearby care (location-aware) --}}
+        <div id="nearby-care" class="bg-white rounded-2xl border border-warm-200 overflow-hidden animate-fade-in" style="animation-delay: 0.35s;">
+            <div class="p-5 border-b border-warm-100 bg-mental-50/30">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-mental-100 border border-mental-200 flex items-center justify-center shrink-0"><svg class="w-4 h-4 text-mental-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
+                    <h2 class="font-display font-bold text-lg text-warm-800">Nearby care</h2>
+                </div>
+            </div>
+            <div class="p-5 ai-section-content" id="nearby-care-content">
+                <div class="flex flex-col items-center justify-center py-6 gap-3"><div class="relative w-10 h-10"><div class="absolute inset-0 rounded-full border-[3px] border-mental-200 border-t-mental-500 animate-spin" style="animation-duration: 0.9s;"></div><div class="absolute inset-1 rounded-full border-[3px] border-physical-200 border-b-physical-500 animate-spin" style="animation-duration: 1.2s; animation-direction: reverse;"></div></div><p class="text-xs text-warm-400 font-medium">Detecting your location...</p></div>
+            </div>
+        </div>
+
     </div>
 
     {{-- AI Conclusion Chat --}}
@@ -153,8 +138,13 @@
         'context' => [
             'type' => 'mental',
             'symptoms' => (array) request('concern', ['general']),
-            'presentSymptoms' => [],
+            'presentSymptoms' => (array) request('physical_signs', []),
             'duration' => request('duration'),
+            'frequency' => request('frequency'),
+            'impact' => (array) request('impact', []),
+            'interference' => request('interference'),
+            'talkedTo' => request('talked_to'),
+            'tried' => (array) request('tried', []),
             'severity' => null,
             'urgencyLabel' => 'Worth exploring further',
             'seekHelp' => [
@@ -164,27 +154,117 @@
         ]
     ])
 
-    {{-- Action buttons --}}
-    <div class="flex flex-col sm:flex-row gap-3 animate-fade-in" style="animation-delay: 0.6s;">
-        <a href="{{ route('mental.index') }}" class="flex-1 py-3 px-6 rounded-xl border-2 border-mental-200 text-mental-600 font-semibold text-center hover:bg-mental-50 transition-colors">
-            Start over
-        </a>
-        <button onclick="openModal('resources')" class="flex-1 py-3 px-6 rounded-xl bg-mental-400 hover:bg-mental-500 text-white font-semibold transition-colors">
-            Show me resources
+    {{-- Neurodivergence modal data --}}
+    @php
+        $nd = [
+            'concerns' => (array) request('concern', []),
+            'presentSymptoms' => (array) request('physical_signs', []),
+            'duration' => request('duration'),
+            'type' => 'mental',
+            'whyThinking' => request('why_thinking', ''),
+            'frequency' => request('frequency', ''),
+            'impact' => (array) request('impact', []),
+            'interference' => request('interference', ''),
+            'talkedTo' => request('talked_to', ''),
+            'tried' => (array) request('tried', []),
+        ];
+    @endphp
+    <script>window._neurodivergenceModalData = @json($nd);</script>
+
+    {{-- Neurodivergence + action buttons, centered --}}
+    <div class="flex flex-col items-center gap-3 mt-6 animate-fade-in" style="animation-delay: 0.5s;">
+        <button onclick="openModalWithData('neurodivergent', window._neurodivergenceModalData)" class="flex items-center gap-2 px-4 py-2 rounded-full bg-mental-400/90 hover:bg-mental-500 text-white text-sm font-medium shadow-sm transition-transform hover:scale-[1.02]" title="Could this be related to neurodivergence?">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+            <span>Could this be related to neurodivergence?</span>
         </button>
+
+        <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+            <a href="{{ route('mental.index') }}" class="flex-1 py-3 px-6 rounded-xl border-2 border-mental-200 text-mental-600 font-semibold text-center hover:bg-mental-50 transition-colors">
+                Start over
+            </a>
+            <button onclick="openModal('resources')" class="flex-1 py-3 px-6 rounded-xl bg-mental-400 hover:bg-mental-500 text-white font-semibold transition-colors">
+                Show me resources
+            </button>
+        </div>
     </div>
 
 </div>
 
 <script>
+    (function() {
+        var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+        var themeClass = 'mental';
+
+        var screeningContext = {
+            type: 'mental',
+            symptoms: @json((array) request('concern', [])),
+            presentSymptoms: @json((array) request('physical_signs', [])),
+            duration: @json(request('duration')),
+            severity: null,
+            whyThinking: @json(request('why_thinking', '')),
+            frequency: @json(request('frequency', '')),
+            impact: @json((array) request('impact', [])),
+            interference: @json(request('interference', '')),
+            tried: @json((array) request('tried', [])),
+            talkedTo: @json(request('talked_to', '')),
+            changes: @json((array) request('changes', [])),
+            betterWorse: @json(request('better_worse', '')),
+            location: null
+        };
+
+        var sections = ['patterns', 'strategies', 'what-to-tell', 'correlation', 'specialists'];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            getUserLocation().then(function(loc) {
+                if (loc) screeningContext.location = loc;
+                sections.forEach(function(s) { fetchAISection(s, screeningContext, csrfToken, themeClass); });
+                fetchNearbyCare(loc, screeningContext, csrfToken);
+            });
+        });
+
+        function fetchNearbyCare(location, ctx, csrf) {
+            var el = document.getElementById('nearby-care-content');
+            if (!el) return;
+            if (!location) {
+                el.innerHTML = '<p class="text-sm text-warm-500 italic">Enable location permissions to see care options near you.</p>';
+                return;
+            }
+            el.innerHTML = '<div class="flex flex-col items-center justify-center py-6 gap-3"><div class="relative w-10 h-10"><div class="absolute inset-0 rounded-full border-[3px] border-mental-200 border-t-mental-500 animate-spin" style="animation-duration: 0.9s;"></div><div class="absolute inset-1 rounded-full border-[3px] border-physical-200 border-b-physical-500 animate-spin" style="animation-duration: 1.2s; animation-direction: reverse;"></div></div><p class="text-xs text-warm-400 font-medium">Finding care near ' + location + '...</p></div>';
+            fetch('/api/generate-section', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+                body: JSON.stringify({ section: 'specialists', context: Object.assign({}, ctx, { location: location }) })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.content) {
+                    renderAIMarkdown(el, '### Care options near ' + location + '\n\n' + data.content, themeClass);
+                } else {
+                    el.innerHTML = '<p class="text-sm text-warm-500 italic">Could not load nearby options.</p>';
+                }
+            })
+            .catch(function() {
+                el.innerHTML = '<p class="text-sm text-warm-500 italic">Could not load nearby options.</p>';
+            });
+        }
+    })();
+
+    // Auto-save screening on page load
     document.addEventListener('DOMContentLoaded', () => {
         const data = {
             type: 'mental',
             title: '{{ collect((array) request("concern", ["Mental health"]))->map(fn($c) => ucfirst(str_replace("-", " ", $c)))->implode(", ") }}',
-            data: {                    concern: @json((array) request('concern', [])),
+            data: {
+                concern: @json((array) request('concern', [])),
                 why_thinking: @json(request('why_thinking', '')),
                 duration: '{{ request('duration') }}',
                 triggers: @json(request('triggers', '')),
+                frequency: @json(request('frequency', '')),
+                impact: @json(request('impact', [])),
+                physical_signs: @json(request('physical_signs', [])),
+                talked_to: @json(request('talked_to', '')),
+                tried: @json(request('tried', [])),
+                interference: @json(request('interference', '')),
                 mode: 'understand'
             },
             severity: null,
@@ -199,7 +279,11 @@
                 'Accept': 'application/json'
             },
             body: JSON.stringify(data)
-        }).catch(() => {});
+        }).then(function(res) {
+            if (!res.ok) console.error('Screening save failed:', res.status);
+        }).catch(function(err) {
+            console.error('Screening save error:', err);
+        });
     });
 </script>
 @endsection

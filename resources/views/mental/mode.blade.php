@@ -5,12 +5,12 @@
 
     {{-- Desktop vertical progress --}}
     <div class="hidden lg:flex w-24 shrink-0 border-r border-mental-100 bg-mental-50/30 py-12 justify-center sticky top-14 h-[calc(100vh-3.5rem)]">
-        @include('components.vertical-progress', ['steps' => ['Concerns', 'Mode', 'Results'], 'current' => 2, 'theme' => 'mental'])
+        @include('components.vertical-progress', ['steps' => ['Concerns', 'Details', 'Mode', 'Results'], 'current' => 3, 'theme' => 'mental'])
     </div>
 
     {{-- Main content --}}
     <div class="flex-1 px-6 sm:px-8 lg:px-12 py-8 sm:py-12">
-        <a href="{{ route('mental.index') }}" class="inline-flex items-center gap-1.5 text-sm text-warm-400 hover:text-warm-600 transition-colors mb-8">
+        <a href="{{ route('mental.details') }}?{{ http_build_query(request()->query()) }}" class="inline-flex items-center gap-1.5 text-sm text-warm-400 hover:text-warm-600 transition-colors mb-8">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
@@ -21,10 +21,10 @@
         <div class="lg:hidden mb-8">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-xs font-medium text-mental-600">Mental health check-in</span>
-                <span class="text-xs text-warm-400">Step 2 of 3</span>
+                <span class="text-xs text-warm-400">Step 3 of 4</span>
             </div>
             <div class="h-1.5 bg-mental-100 rounded-full overflow-hidden">
-                <div class="h-full bg-mental-400 rounded-full progress-bar" style="width: 66%"></div>
+                <div class="h-full bg-mental-400 rounded-full progress-bar" style="width: 75%"></div>
             </div>
         </div>
 

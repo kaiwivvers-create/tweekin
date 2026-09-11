@@ -4,7 +4,7 @@
 <div class="w-full flex">
     {{-- Sidebar with vertical progress --}}
     <div class="hidden lg:flex w-24 shrink-0 border-r border-physical-100 bg-physical-50/30 py-12 justify-center sticky top-14 h-[calc(100vh-3.5rem)]">
-        @include('components.vertical-progress', ['steps' => ['Category', 'Questions', 'Results'], 'current' => 2, 'theme' => 'physical'])
+        @include('components.vertical-progress', ['steps' => ['Category', 'Questions', 'Details', 'Results'], 'current' => 2, 'theme' => 'physical'])
     </div>
 
     <div class="flex-1 px-6 sm:px-8 lg:px-12 py-8 sm:py-12">
@@ -16,10 +16,10 @@
         <div class="lg:hidden mb-8">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-xs font-medium text-physical-600">Physical symptoms</span>
-                <span class="text-xs text-warm-400">Step 2 of 3</span>
+                <span class="text-xs text-warm-400">Step 2 of 4</span>
             </div>
             <div class="h-1.5 bg-physical-100 rounded-full overflow-hidden">
-                <div class="h-full bg-physical-400 rounded-full progress-bar" style="width: 66%"></div>
+                <div class="h-full bg-physical-400 rounded-full progress-bar" style="width: 50%"></div>
             </div>
         </div>
 
@@ -63,7 +63,7 @@
             </div>
         </div>
 
-        <form id="physical-questions-form" action="{{ route('physical.results') }}" method="GET" class="space-y-8">
+        <form id="physical-questions-form" action="{{ route('physical.details') }}" method="GET" class="space-y-8">
             {{-- Pass symptoms through --}}
             @foreach($selectedSymptoms as $s)
             <input type="hidden" name="symptom[]" value="{{ $s }}">

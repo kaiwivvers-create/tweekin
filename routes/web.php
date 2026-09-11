@@ -40,7 +40,7 @@ Route::post('/screenings', function (Request $request) {
         'assessment' => 'nullable|string',
     ]);
 
-    Screening::create([
+    $screening = Screening::create([
         'user_id' => auth()->id(),
         'session_id' => auth()->check() ? null : session()->getId(),
         'type' => $validated['type'],
@@ -49,6 +49,11 @@ Route::post('/screenings', function (Request $request) {
         'severity' => $validated['severity'] ?? null,
         'assessment' => $validated['assessment'] ?? null,
     ]);
+
+    // Create notification for logged-in users
+    if (auth()->check() && $screening->severity) {
+        \App\Models\UserNotification::forScreeningComplete($screening);
+    }
 
     return response()->json(['success' => true]);
 })->name('screenings.store');
@@ -63,6 +68,52 @@ Route::get('/screenings/{screening}', function (Screening $screening) {
     return view('screenings.show', compact('screening'));
 })->name('screenings.show');
 
+// Screening comparison
+Route::middleware('auth')->prefix('compare')->name('compare.')->group(function () {
+    Route::get('/', function () {
+        $screenings = Screening::forCurrentUser()->latest()->get();
+        return view('compare.index', compact('screenings'));
+    })->name('index');
+
+    Route::post('/', function (Request $request) {
+        $ids = $request->input('screenings', []);
+        if (count($ids) < 2) {
+            return redirect()->route('compare.index')->with('error', 'Select at least 2 screenings to compare.');
+        }
+        $screenings = Screening::whereIn('id', $ids)
+            ->where('user_id', auth()->id())
+            ->get();
+        return view('compare.show', compact('screenings'));
+    })->name('show');
+});
+
+// Notifications
+Route::middleware('auth')->prefix('notifications')->name('notifications.')->group(function () {
+    Route::get('/', function () {
+        $notifications = \App\Models\UserNotification::where('user_id', auth()->id())
+            ->latest()
+            ->paginate(20);
+        return view('notifications.index', compact('notifications'));
+    })->name('index');
+
+    Route::post('/{notification}/read', function (\App\Models\UserNotification $notification) {
+        abort_unless($notification->user_id === auth()->id(), 403);
+        $notification->markRead();
+        return response()->json(['success' => true]);
+    })->name('read');
+
+    Route::post('/read-all', function () {
+        \App\Models\UserNotification::where('user_id', auth()->id())
+            ->where('read', false)
+            ->update(['read' => true]);
+        return response()->json(['success' => true]);
+    })->name('readAll');
+
+    Route::get('/unread-count', function () {
+        return response()->json(['count' => \App\Models\UserNotification::unreadCount(auth()->id())]);
+    })->name('unreadCount');
+});
+
 // Physical symptom flow
 Route::prefix('physical')->name('physical.')->group(function () {
     Route::get('/', function () {
@@ -72,6 +123,10 @@ Route::prefix('physical')->name('physical.')->group(function () {
     Route::get('/questions', function () {
         return view('physical.questions');
     })->name('questions');
+
+    Route::get('/details', function () {
+        return view('physical.details');
+    })->name('details');
 
     Route::get('/results', function () {
         return view('physical.results');
@@ -83,6 +138,10 @@ Route::prefix('mental')->name('mental.')->group(function () {
     Route::get('/', function () {
         return view('mental.index');
     })->name('index');
+
+    Route::get('/details', function () {
+        return view('mental.details');
+    })->name('details');
 
     Route::get('/mode', function () {
         return view('mental.mode');
@@ -107,6 +166,31 @@ Route::prefix('other')->name('other.')->group(function () {
         return view('other.results');
     })->name('results');
 });
+
+// AI Section Generation API
+Route::post('/api/generate-section', function (Request $request) {
+    $request->validate([
+        'section' => 'required|string|in:patterns,strategies,what-to-tell,correlation,specialists,all',
+        'context' => 'required|array',
+    ]);
+
+    $gemini = new \App\Services\GeminiChatService();
+
+    if (!$gemini->isConfigured()) {
+        return response()->json(['error' => 'AI is not configured.'], 503);
+    }
+
+    $response = $gemini->generateSection(
+        $request->input('section'),
+        $request->input('context')
+    );
+
+    if ($response === null) {
+        return response()->json(['error' => 'Could not generate section. Please try again.'], 500);
+    }
+
+    return response()->json(['content' => $response]);
+})->name('api.generate-section');
 
 // AI Chat API
 Route::post('/api/chat', function (Request $request) {

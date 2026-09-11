@@ -4,6 +4,10 @@
 
 @if(Auth::check())
     {{-- ============ LOGGED IN HOMEPAGE ============ --}}
+    @php
+        $recentScreenings = \App\Models\Screening::forCurrentUser()->latest()->take(5)->get();
+    @endphp
+
     <section class="relative overflow-hidden">
         <div class="absolute inset-0 bg-gradient-to-b from-physical-50/40 via-white to-white"></div>
         <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-gradient-to-br from-emerald-200/20 via-white/30 to-sky-200/20 rounded-full blur-3xl -z-0"></div>
@@ -53,16 +57,52 @@
     <div class="w-full px-6 sm:px-8 lg:px-12 pb-16">
         <div class="w-full">
             <h2 class="font-display font-bold text-xl text-warm-800 mb-4">Recent activity</h2>
-            <div class="bg-white rounded-2xl border border-warm-200 p-8 text-center">
-                <div class="w-12 h-12 rounded-xl bg-warm-100 flex items-center justify-center mx-auto mb-3">
-                    <svg class="w-6 h-6 text-warm-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+
+            @if($recentScreenings->count() > 0)
+                <div class="space-y-3">
+                    @foreach($recentScreenings as $s)
+                    <a href="{{ route('screenings.show', $s) }}" class="group flex items-center gap-4 bg-white rounded-2xl border border-warm-200 p-4 card-hover">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0
+                            @if($s->type === 'physical') bg-physical-100 border border-physical-200
+                            @elseif($s->type === 'mental') bg-mental-100 border border-mental-200
+                            @else bg-other-100 border border-other-200
+                            @endif">
+                            @if($s->type === 'physical')
+                                <svg class="w-5 h-5 text-physical-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                            @elseif($s->type === 'mental')
+                                <svg class="w-5 h-5 text-mental-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                            @else
+                                <svg class="w-5 h-5 text-other-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            @endif
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-semibold text-warm-800 truncate">{{ $s->title }}</div>
+                            <div class="text-xs text-warm-400">{{ ucfirst($s->type) }} &middot; {{ $s->created_at->diffForHumans() }}</div>
+                        </div>
+                        @if($s->severity)
+                            <span class="text-xs px-2 py-0.5 rounded-full font-semibold shrink-0
+                                @if($s->severity <= 2) bg-success/20 text-success
+                                @elseif($s->severity <= 3) bg-warning/20 text-warning
+                                @else bg-danger/20 text-danger
+                                @endif
+                            ">{{ $s->severity }}/5</span>
+                        @endif
+                        <svg class="w-4 h-4 text-warm-400 group-hover:text-warm-600 shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </a>
+                    @endforeach
                 </div>
-                <p class="text-warm-500 text-sm mb-4">No recent screenings yet. Start one above to see your history here.</p>
-                <a href="{{ route('physical.index') }}" class="inline-flex items-center gap-2 text-sm font-medium text-physical-600 hover:text-physical-700 transition-colors">
-                    Start your first screening
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-                </a>
-            </div>
+            @else
+                <div class="bg-white rounded-2xl border border-warm-200 p-8 text-center">
+                    <div class="w-12 h-12 rounded-xl bg-warm-100 flex items-center justify-center mx-auto mb-3">
+                        <svg class="w-6 h-6 text-warm-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <p class="text-warm-500 text-sm mb-4">No recent screenings yet. Start one above to see your history here.</p>
+                    <a href="{{ route('physical.index') }}" class="inline-flex items-center gap-2 text-sm font-medium text-physical-600 hover:text-physical-700 transition-colors">
+                        Start your first screening
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                    </a>
+                </div>
+            @endif
         </div>
     </div>
 
@@ -283,6 +323,59 @@
                         </div>
                         <span class="text-xs text-warm-400">3 screening categories</span>
                     </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="w-full px-6 sm:px-8 lg:px-12"><div class="h-px bg-warm-200"></div></div>
+
+    {{-- Stats / Trust signals --}}
+    <section class="w-full px-6 sm:px-8 lg:px-12 py-14">
+        <div class="w-full">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center stagger-children">
+                <div>
+                    <div class="font-display font-extrabold text-3xl sm:text-4xl text-warm-800 mb-1">3</div>
+                    <div class="text-sm text-warm-500">Screening paths</div>
+                </div>
+                <div>
+                    <div class="font-display font-extrabold text-3xl sm:text-4xl text-warm-800 mb-1">AI</div>
+                    <div class="text-sm text-warm-500">Powered guidance</div>
+                </div>
+                <div>
+                    <div class="font-display font-extrabold text-3xl sm:text-4xl text-warm-800 mb-1">0</div>
+                    <div class="text-sm text-warm-500">Diagnoses given</div>
+                </div>
+                <div>
+                    <div class="font-display font-extrabold text-3xl sm:text-4xl text-warm-800 mb-1">100%</div>
+                    <div class="text-sm text-warm-500">Free forever</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="w-full px-6 sm:px-8 lg:px-12"><div class="h-px bg-warm-200"></div></div>
+
+    {{-- What people wonder --}}
+    <section class="w-full px-6 sm:px-8 lg:px-12 py-14">
+        <div class="w-full max-w-3xl mx-auto">
+            <h2 class="font-display font-bold text-2xl sm:text-3xl text-warm-800 mb-8 text-center tracking-tight">Common questions</h2>
+            <div class="space-y-4 stagger-children">
+                <div class="bg-white rounded-2xl border border-warm-200 p-5">
+                    <h3 class="font-semibold text-warm-800 text-sm mb-2">Is this a replacement for a doctor?</h3>
+                    <p class="text-sm text-warm-500 leading-relaxed">Absolutely not. {{ config('app.name', 'Tweek') }} is a preliminary screening tool. It helps you understand what might be going on and whether it's worth seeking professional help — but it can never replace a real medical evaluation.</p>
+                </div>
+                <div class="bg-white rounded-2xl border border-warm-200 p-5">
+                    <h3 class="font-semibold text-warm-800 text-sm mb-2">Do you diagnose people?</h3>
+                    <p class="text-sm text-warm-500 leading-relaxed">No. We don't give diagnoses. We provide information about what your symptoms could indicate and suggest next steps. Only a trained professional can give you a proper diagnosis.</p>
+                </div>
+                <div class="bg-white rounded-2xl border border-warm-200 p-5">
+                    <h3 class="font-semibold text-warm-800 text-sm mb-2">What if I'm overthinking things?</h3>
+                    <p class="text-sm text-warm-500 leading-relaxed">That's exactly what we're here for. Our "Not sure?" flow is designed for people who aren't sure what category their concern falls into. Sometimes just talking through it helps.</p>
+                </div>
+                <div class="bg-white rounded-2xl border border-warm-200 p-5">
+                    <h3 class="font-semibold text-warm-800 text-sm mb-2">Is my data private?</h3>
+                    <p class="text-sm text-warm-500 leading-relaxed">Your screening data is stored securely. If you're not signed in, it's tied to your browser session only. Sign up to keep a history of your screenings across devices.</p>
                 </div>
             </div>
         </div>

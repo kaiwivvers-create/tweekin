@@ -4,7 +4,7 @@
 <div class="w-full flex">
     {{-- Sidebar with vertical progress --}}
     <div class="hidden lg:flex w-24 shrink-0 border-r border-mental-100 bg-mental-50/30 py-12 justify-center sticky top-14 h-[calc(100vh-3.5rem)]">
-        @include('components.vertical-progress', ['steps' => ['Details', 'Mode', 'Results'], 'current' => 1, 'theme' => 'mental'])
+        @include('components.vertical-progress', ['steps' => ['Concerns', 'Details', 'Mode', 'Results'], 'current' => 1, 'theme' => 'mental'])
     </div>
 
     {{-- Main content --}}
@@ -18,10 +18,10 @@
         <div class="lg:hidden mb-8">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-xs font-medium text-mental-600">Mental health check-in</span>
-                <span class="text-xs text-warm-400">Step 1 of 3</span>
+                <span class="text-xs text-warm-400">Step 1 of 4</span>
             </div>
             <div class="h-1.5 bg-mental-100 rounded-full overflow-hidden">
-                <div class="h-full bg-mental-400 rounded-full progress-bar" style="width: 33%"></div>
+                <div class="h-full bg-mental-400 rounded-full progress-bar" style="width: 25%"></div>
             </div>
         </div>
 
@@ -45,7 +45,7 @@
             </div>
         </div>
 
-        <form id="mental-form" action="{{ route('mental.mode') }}" method="GET" class="space-y-6">
+        <form id="mental-form" action="{{ route('mental.details') }}" method="GET" class="space-y-6">
             <div class="animate-fade-in" style="animation-delay: 0.2s;">
                 <label class="block text-sm font-semibold text-warm-700 mb-3">What do you think might be going on? <span class="text-warm-400 font-normal">(pick all that apply)</span></label>
                 <div class="space-y-2">
