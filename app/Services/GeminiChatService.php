@@ -281,6 +281,283 @@ class GeminiChatService
     }
 
     /**
+     * Region-appropriate helplines for the user's area and concern.
+     *
+     * Only used when no REAL facility could be found nearby. The model is never
+     * asked for facilities here: a card called "care near you" must not name
+     * places that only exist in the model's imagination.
+     *
+     * @return array<int, array{name:string, number:string, note:string}>|null
+     */
+    public function localHelplines(array $context): ?array
+    {
+        if (empty($this->apiKey)) {
+            return null;
+        }
+
+        $type = $context['type'] ?? 'general';
+        $symptoms = $context['symptoms'] ?? [];
+        $presentSymptoms = $context['presentSymptoms'] ?? [];
+        $duration = $context['duration'] ?? null;
+        $severity = $context['severity'] ?? null;
+        $whyThinking = $context['whyThinking'] ?? ($context['why_thinking'] ?? '');
+        $location = $context['location'] ?? null;
+
+        $symptomList = implode(', ', array_map(fn($s) => str_replace('-', ' ', $s), $symptoms));
+        $presentList = count($presentSymptoms) > 0
+            ? implode(', ', array_map(fn($s) => str_replace('-', ' ', $s), $presentSymptoms))
+            : 'none reported';
+
+        $locationLine = $location ?: 'unknown (do not guess a city)';
+
+        $prompt = "We could not find a real facility near this person, so give them phone numbers to call instead.\n\n" .
+            "User's location: {$locationLine}\n" .
+            "Screening type: {$type}\n" .
+            "Their main concerns: {$symptomList}\n" .
+            "Other symptoms: {$presentList}\n" .
+            "Duration: {$duration}\n" .
+            "Severity: {$severity}/5\n" .
+            "In their own words: {$whyThinking}\n\n" .
+            "Return 2-4 helplines: free, always-available numbers that are real and well known for " .
+            "this location and concern (crisis lines, nurse advice lines, poison control, domestic " .
+            "violence lines, mental health lines, etc), each with a short note about when to use it.\n\n" .
+            "Only include a number you are confident is correct and still active. Never invent or guess " .
+            "a number, and never invent a facility — if you do not know a real line for this area, " .
+            "return an empty helplines list.";
+
+        try {
+            $response = Http::timeout(40)->post("{$this->baseUrl}?key={$this->apiKey}", [
+                'system_instruction' => [
+                    'parts' => [['text' => $this->buildNearbyCareSystemPrompt()]],
+                ],
+                'contents' => [[
+                    'role' => 'user',
+                    'parts' => [['text' => $prompt]],
+                ]],
+                'generationConfig' => [
+                    'temperature' => 0.5,
+                    'topP' => 0.9,
+                    'maxOutputTokens' => 2048,
+                    'responseMimeType' => 'application/json',
+                    'responseSchema' => [
+                        'type' => 'object',
+                        'properties' => [
+                            'helplines' => [
+                                'type' => 'array',
+                                'items' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'name' => ['type' => 'string'],
+                                        'number' => ['type' => 'string'],
+                                        'note' => ['type' => 'string'],
+                                    ],
+                                    'required' => ['name', 'number', 'note'],
+                                ],
+                            ],
+                        ],
+                        'required' => ['helplines'],
+                    ],
+                ],
+            ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? null;
+                if (!$text) {
+                    return null;
+                }
+                $decoded = json_decode($text, true);
+                if (!is_array($decoded)) {
+                    return null;
+                }
+                $helplines = array_values($decoded['helplines'] ?? []);
+
+                return count($helplines) > 0 ? $helplines : null;
+            }
+
+            \Log::warning('Gemini local helplines error', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+
+            return null;
+        } catch (\Exception $e) {
+            \Log::error('Gemini local helplines exception', ['message' => $e->getMessage()]);
+            return null;
+        }
+    }
+
+    /**
+     * Given a list of REAL nearby facilities, ask the model to explain how each one
+     * fits the user's screening, plus return region-appropriate helplines.
+     *
+     * Returns ['notes' => [['index' => int, 'goodFor' => string, 'why' => string]],
+     *          'helplines' => [['name' => string, 'number' => string, 'note' => string]]]
+     */
+    public function annotatePlaces(array $places, array $context): ?array
+    {
+        if (empty($this->apiKey) || count($places) === 0) {
+            return null;
+        }
+
+        $type = $context['type'] ?? 'general';
+        $symptoms = $context['symptoms'] ?? [];
+        $presentSymptoms = $context['presentSymptoms'] ?? [];
+        $duration = $context['duration'] ?? null;
+        $severity = $context['severity'] ?? null;
+        $whyThinking = $context['whyThinking'] ?? ($context['why_thinking'] ?? '');
+        $location = $context['location'] ?? null;
+
+        $symptomList = implode(', ', array_map(fn($s) => str_replace('-', ' ', $s), $symptoms));
+        $presentList = count($presentSymptoms) > 0
+            ? implode(', ', array_map(fn($s) => str_replace('-', ' ', $s), $presentSymptoms))
+            : 'none reported';
+
+        $list = '';
+        foreach ($places as $i => $place) {
+            $list .= ($i + 1) . '. index=' . $i
+                . ' | name: ' . ($place['name'] ?? 'Unnamed')
+                . ' | type: ' . ($place['type'] ?? 'unknown')
+                . ($place['address'] ? ' | address: ' . $place['address'] : '')
+                . ($place['distanceKm'] !== null ? ' | ' . $place['distanceKm'] . ' km away' : '')
+                . "\n";
+        }
+
+        $prompt = "The user has finished a screening and we found these real facilities near them.\n\n" .
+            "User's area: " . ($location ?: 'unknown') . "\n" .
+            "Screening type: {$type}\n" .
+            "Their main concerns: {$symptomList}\n" .
+            "Other symptoms: {$presentList}\n" .
+            "Duration: {$duration}\n" .
+            "Severity: {$severity}/5\n" .
+            "In their own words: {$whyThinking}\n\n" .
+            "REAL FACILITIES FOUND:\n{$list}\n" .
+            "For EVERY facility above, write:\n" .
+            "- goodFor: what this kind of facility is genuinely known for managing, phrased around " .
+            "this user's specific concerns (one short sentence, no 'e.g.').\n" .
+            "- why: 1-2 sentences on why this specific place suits this person's situation. Reference " .
+            "their actual symptoms. Do not claim to know the facility's private details — speak about " .
+            "what the facility type is for.\n" .
+            "Keep the exact index of each facility. Never rename them or invent extra ones.\n\n" .
+            "Then give 2-4 helplines that are real and correct for the user's area and concern " .
+            "(crisis lines, nurse advice lines, urgent care lines). Each needs a short note about when to use it.\n\n" .
+            "If a facility listing is only loosely relevant to the user's problem, say so honestly in why " .
+            "rather than overstating the fit.";
+
+        try {
+            $response = Http::timeout(40)->post("{$this->baseUrl}?key={$this->apiKey}", [
+                'system_instruction' => [
+                    'parts' => [['text' => $this->buildNearbyCareSystemPrompt()]],
+                ],
+                'contents' => [[
+                    'role' => 'user',
+                    'parts' => [['text' => $prompt]],
+                ]],
+                'generationConfig' => [
+                    'temperature' => 0.6,
+                    'topP' => 0.9,
+                    'maxOutputTokens' => 2048,
+                    'responseMimeType' => 'application/json',
+                    'responseSchema' => [
+                        'type' => 'object',
+                        'properties' => [
+                            'notes' => [
+                                'type' => 'array',
+                                'items' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'index' => ['type' => 'integer'],
+                                        'goodFor' => ['type' => 'string'],
+                                        'why' => ['type' => 'string'],
+                                    ],
+                                    'required' => ['index', 'goodFor', 'why'],
+                                ],
+                            ],
+                            'helplines' => [
+                                'type' => 'array',
+                                'items' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'name' => ['type' => 'string'],
+                                        'number' => ['type' => 'string'],
+                                        'note' => ['type' => 'string'],
+                                    ],
+                                    'required' => ['name', 'number', 'note'],
+                                ],
+                            ],
+                        ],
+                        'required' => ['notes', 'helplines'],
+                    ],
+                ],
+            ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? null;
+                if (!$text) {
+                    return null;
+                }
+                $decoded = json_decode($text, true);
+                if (!is_array($decoded)) {
+                    return null;
+                }
+
+                return [
+                    'notes' => array_values($decoded['notes'] ?? []),
+                    'helplines' => array_values($decoded['helplines'] ?? []),
+                ];
+            }
+
+            \Log::warning('Gemini place annotation error', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+
+            return null;
+        } catch (\Exception $e) {
+            \Log::error('Gemini place annotation exception', ['message' => $e->getMessage()]);
+            return null;
+        }
+    }
+
+    /**
+     * Last-resort helplines when the model cannot be reached.
+     * Kept deliberately generic and clearly labelled.
+     */
+    public function fallbackHelplines(string $type): array
+    {
+        if ($type === 'mental') {
+            return [
+                ['name' => '988 Suicide & Crisis Lifeline', 'number' => '988', 'note' => 'US & Canada — free, 24/7, call or text'],
+                ['name' => 'Crisis Text Line', 'number' => '741741', 'note' => 'US — text HOME to reach a counselor'],
+            ];
+        }
+
+        return [
+            ['name' => 'Emergency services', 'number' => '112', 'note' => 'Works on most phones worldwide — use for anything urgent'],
+        ];
+    }
+
+    /**
+     * System prompt for nearby care lookups
+     */
+    protected function buildNearbyCareSystemPrompt(): string
+    {
+        return "You help people find the right kind of care near them for a symptom screening app called Tweek.\n\n" .
+        "RULES:\n" .
+        "1. Never invent a specific private practice, clinic, or phone number. Only name facility TYPES " .
+        "that reliably exist (e.g. 'Community Mental Health Center', 'University Hospital Sleep Clinic', " .
+        "'Urgent Care Clinic'), or a well-known public facility you are confident about.\n" .
+        "2. Only include a phone number when it is a widely known public or national line. When unsure, " .
+        "leave 'call' empty — the app will offer a map search instead.\n" .
+        "3. Always include real helplines for the user's location, because they are the reliable part.\n" .
+        "4. Be specific to the user's concern. Someone describing food avoidance should not be sent to " .
+        "a general practitioner first — match the specialty to the problem.\n" .
+        "5. Never diagnose. Describe what each place is good at managing, not what the user has.\n" .
+        "6. Return valid JSON matching the provided schema. No prose outside the JSON.\n";
+    }
+
+    /**
      * Check if the API key is configured
      */
     public function isConfigured(): bool

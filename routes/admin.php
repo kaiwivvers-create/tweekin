@@ -1,5 +1,10 @@
 <?php
 
+use App\Http\Controllers\Admin\ActivityController;
+use App\Http\Controllers\Admin\DatabaseController;
+use App\Http\Controllers\Admin\DataController;
+use App\Http\Controllers\Admin\RoleController;
+use App\Models\ActivityLog;
 use App\Models\User;
 use App\Models\Screening;
 use App\Models\Role;
@@ -36,7 +41,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
             $users->whereHas('role', fn($q) => $q->where('level', '<', 100));
         }
         $users = $users->latest()->paginate(20);
-        return view('admin.users', compact('users', 'isSuperAdmin'));
+
+        // Super admins get an inline record editor, which needs the table's columns.
+        $editor = $isSuperAdmin ? DataController::editorData('users') : [];
+
+        return view('admin.users', compact('users', 'isSuperAdmin') + $editor);
     })->name('users');
 
     Route::post('/users/{user}/role', function (User $user, Request $request) {
@@ -57,7 +66,17 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
             }
         }
 
+        $beforeRole = $user->role->label ?? 'No role';
         $user->update(['role_id' => $request->role_id]);
+        $afterRole = $user->fresh()->role->label ?? 'No role';
+
+        ActivityLog::record('updated', "Changed {$user->name}'s role from \"{$beforeRole}\" to \"{$afterRole}\".", [
+            'subject_type' => User::class,
+            'subject_id' => $user->id,
+            'subject_label' => $user->name,
+            'changes' => ['role' => ['before' => $beforeRole, 'after' => $afterRole]],
+        ]);
+
         return back()->with('success', 'User role updated.');
     })->name('users.role');
 
@@ -69,7 +88,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
             $screenings->whereHas('user.role', fn($q) => $q->where('level', '<', 100));
         }
         $screenings = $screenings->latest()->paginate(20);
-        return view('admin.screenings', compact('screenings'));
+
+        // Super admins get an inline record editor, which needs the table's columns.
+        $editor = $isSuperAdmin ? DataController::editorData('screenings') : [];
+
+        return view('admin.screenings', compact('screenings') + $editor);
     })->name('screenings');
 
     // Reports
@@ -82,7 +105,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         return view('admin.reports', compact('daily'));
     })->name('reports');
 
-
+    // Activity log
+    Route::get('/activity', [ActivityController::class, 'index'])->name('activity');
+    Route::delete('/activity', [ActivityController::class, 'clear'])->name('activity.clear');
 
     // Brand Settings
     Route::get('/brand', function () {
@@ -98,6 +123,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
             'accent_color' => 'nullable|string|max:7',
             'disclaimer_text' => 'nullable|string',
         ]);
+
+        $before = Setting::allAsArray();
 
         Setting::set('app_name', $request->app_name, 'string');
         Setting::set('primary_color', $request->primary_color ?? '#FFF9E8', 'color');
@@ -116,7 +143,13 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
             }
         }
 
-        config(['app.name' => $request->app_name]);
+        $after = Setting::allAsArray();
+
+        ActivityLog::record('updated', 'Updated the brand and app settings.', [
+            'subject_type' => Setting::class,
+            'subject_label' => 'Brand settings',
+            'changes' => ActivityLog::diff($before, $after),
+        ]);
 
         return back()->with('success', 'Brand settings saved.');
     })->name('brand.update');
@@ -134,6 +167,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         $path = $request->file('logo')->store('brand', 'public');
         Setting::set('logo_path', $path, 'image');
 
+        ActivityLog::record('updated', 'Uploaded a new brand logo.', [
+            'subject_type' => Setting::class,
+            'subject_label' => 'Logo',
+            'changes' => ['logo_path' => ['before' => null, 'after' => $path]],
+        ]);
+
         return response()->json(['success' => true, 'url' => Storage::disk('public')->url($path)]);
     })->name('brand.logo');
 
@@ -142,6 +181,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
             Storage::disk('public')->delete(Setting::get('logo_path'));
             Setting::set('logo_path', '', 'image');
         }
+
+        ActivityLog::record('deleted', 'Removed the brand logo.', [
+            'subject_type' => Setting::class,
+            'subject_label' => 'Logo',
+        ]);
+
         return response()->json(['success' => true]);
     })->name('brand.logo.delete');
 
@@ -158,6 +203,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         $path = $request->file('hero_image')->store('brand/hero', 'public');
         Setting::set('hero_image_path', $path, 'image');
 
+        ActivityLog::record('updated', 'Uploaded a new hero image.', [
+            'subject_type' => Setting::class,
+            'subject_label' => 'Hero image',
+            'changes' => ['hero_image_path' => ['before' => null, 'after' => $path]],
+        ]);
+
         return response()->json(['success' => true, 'url' => Storage::disk('public')->url($path)]);
     })->name('brand.hero');
 
@@ -166,6 +217,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
             Storage::disk('public')->delete(Setting::get('hero_image_path'));
             Setting::set('hero_image_path', '', 'image');
         }
+
+        ActivityLog::record('deleted', 'Removed the hero image.', [
+            'subject_type' => Setting::class,
+            'subject_label' => 'Hero image',
+        ]);
+
         return response()->json(['success' => true]);
     })->name('brand.hero.delete');
 
@@ -173,73 +230,49 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/brand/api-key', function (Request $request) {
         $request->validate([
             'google_api_key' => 'nullable|string|max:255',
+            'google_places_api_key' => 'nullable|string|max:255',
         ]);
-        Setting::set('google_api_key', $request->input('google_api_key', ''), 'string');
-        return back()->with('success', 'API key saved.');
+
+        // Blank means "leave as-is" so saving one key doesn't wipe the other,
+        // since both fields are masked password inputs.
+        $changed = [];
+        if ($request->filled('google_api_key')) {
+            Setting::set('google_api_key', $request->input('google_api_key'), 'string');
+            $changed[] = 'google_api_key';
+        }
+        if ($request->filled('google_places_api_key')) {
+            Setting::set('google_places_api_key', $request->input('google_places_api_key'), 'string');
+            $changed[] = 'google_places_api_key';
+        }
+
+        if ($changed) {
+            ActivityLog::record('updated', 'Updated the stored API keys.', [
+                'subject_type' => Setting::class,
+                'subject_label' => 'API keys',
+                'changes' => collect($changed)->mapWithKeys(fn ($key) => [$key => ['before' => '••••••', 'after' => '••••••']])->all(),
+            ]);
+        }
+
+        return back()->with('success', 'API keys saved.');
     })->name('brand.api-key');
 
     // Roles & Permissions
-    Route::get('/permissions', function () {
-        $isSuperAdmin = auth()->user()->role->level >= 100;
-        $roles = Role::withCount('users');
-        if (!$isSuperAdmin) {
-            $roles->where('level', '<', 100);
-        }
-        $roles = $roles->get();
-        $allPermissions = [
-            'users.view' => 'View users',
-            'users.edit' => 'Edit users',
-            'users.delete' => 'Delete users',
-            'screenings.view' => 'View all screenings',
-            'screenings.view_own' => 'View own screenings',
-            'screenings.create' => 'Create screenings',
-            'settings.view' => 'View settings',
-            'settings.edit' => 'Edit settings',
-            'reports.view' => 'View reports',
-            'roles.manage' => 'Manage roles',
-        ];
-        return view('admin.permissions', compact('roles', 'allPermissions', 'isSuperAdmin'));
-    })->name('permissions');
+    Route::get('/permissions', [RoleController::class, 'index'])->name('permissions');
+    Route::post('/permissions', [RoleController::class, 'store'])->name('permissions.store');
+    Route::put('/permissions/{role}', [RoleController::class, 'update'])->name('permissions.update');
+    Route::delete('/permissions/{role}', [RoleController::class, 'destroy'])->name('permissions.destroy');
 
-    Route::post('/permissions', function (Request $request) {
-        $isSuperAdmin = auth()->user()->role->level >= 100;
+    // Database tools (export / import / reset) — super admin only
+    Route::get('/database', [DatabaseController::class, 'index'])->name('database');
+    Route::get('/database/export', [DatabaseController::class, 'export'])->name('database.export');
+    Route::post('/database/import', [DatabaseController::class, 'import'])->name('database.import');
+    Route::post('/database/reset', [DatabaseController::class, 'reset'])->name('database.reset');
 
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'label' => 'required|string|max:255',
-            'level' => 'required|integer|min:0|max:100',
-            'permissions' => 'nullable|array',
-        ]);
-
-        // Non-super-admins cannot create roles with level >= 100
-        if (!$isSuperAdmin && $request->level >= 100) {
-            abort(403, 'Cannot create super admin roles.');
-        }
-
-        Role::create($request->only('name', 'label', 'level', 'permissions'));
-        return back()->with('success', 'Role created.');
-    })->name('permissions.store');
-
-    Route::put('/permissions/{role}', function (Role $role, Request $request) {
-        $isSuperAdmin = auth()->user()->role->level >= 100;
-
-        // Non-super-admins cannot edit super admin roles
-        if (!$isSuperAdmin && $role->level >= 100) {
-            abort(403, 'Cannot modify super admin role.');
-        }
-
-        $request->validate([
-            'label' => 'required|string|max:255',
-            'level' => 'required|integer|min:0|max:100',
-            'permissions' => 'nullable|array',
-        ]);
-
-        // Non-super-admins cannot promote a role to level >= 100
-        if (!$isSuperAdmin && $request->level >= 100) {
-            abort(403, 'Cannot create super admin roles.');
-        }
-
-        $role->update($request->only('label', 'level', 'permissions'));
-        return back()->with('success', 'Role updated.');
-    })->name('permissions.update');
+    // Raw data editor + SQL console — super admin only
+    Route::get('/data', [DataController::class, 'index'])->name('data');
+    Route::post('/data/query', [DataController::class, 'query'])->name('data.query');
+    Route::get('/data/{table}', [DataController::class, 'browse'])->name('data.browse');
+    Route::get('/data/{table}/{id}', [DataController::class, 'show'])->name('data.show');
+    Route::put('/data/{table}/{id}', [DataController::class, 'update'])->name('data.update');
+    Route::delete('/data/{table}/{id}', [DataController::class, 'destroy'])->name('data.destroy');
 });

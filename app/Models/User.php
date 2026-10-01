@@ -59,11 +59,23 @@ class User extends Authenticatable
         return (bool) $this->is_admin;
     }
 
+    /**
+     * Super admins sit at level 100 and are the only ones allowed to touch
+     * database tooling, raw data and other super admin accounts.
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->isAdmin()
+            && $this->role
+            && ($this->role->level >= 100 || $this->role->name === 'super_admin');
+    }
+
     public function hasPermission(string $permission): bool
     {
-        if ($this->is_admin && (!$this->role || $this->role->name === 'super_admin')) {
+        if ($this->isSuperAdmin()) {
             return true;
         }
-        return $this->role && $this->role->hasPermission($permission);
+
+        return (bool) ($this->role && $this->role->hasPermission($permission));
     }
 }

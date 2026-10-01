@@ -73,6 +73,9 @@
                 $canReports = $isSuperAdmin || in_array('reports.view', $adminPerms);
                 $canSettings = $isSuperAdmin || in_array('settings.edit', $adminPerms);
                 $canRoles = $isSuperAdmin || in_array('roles.manage', $adminPerms);
+                $canActivity = $isSuperAdmin || in_array('activity.view', $adminPerms);
+                $canDatabase = $isSuperAdmin || in_array('database.manage', $adminPerms);
+                $canData = $isSuperAdmin || in_array('data.manage', $adminPerms);
             @endphp
             <div class="pt-4 pb-1 px-3">
                 <span class="text-[10px] font-semibold text-warm-400 uppercase tracking-wider">Admin</span>
@@ -108,6 +111,14 @@
             </a>
             @endif
 
+            @if($canActivity)
+            <a href="{{ url('/admin/activity') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
+                {{ str_starts_with($currentRoute, 'admin.activity') ? 'bg-physical-100 text-physical-700' : 'text-warm-500 hover:text-warm-700 hover:bg-warm-100' }}">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Activity
+            </a>
+            @endif
+
             @if($canSettings)
             <a href="{{ url('/admin/brand') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
                 {{ str_starts_with($currentRoute, 'admin.brand') ? 'bg-physical-100 text-physical-700' : 'text-warm-500 hover:text-warm-700 hover:bg-warm-100' }}">
@@ -121,6 +132,28 @@
                 {{ str_starts_with($currentRoute, 'admin.permissions') ? 'bg-physical-100 text-physical-700' : 'text-warm-500 hover:text-warm-700 hover:bg-warm-100' }}">
                 <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                 Roles & Permissions
+            </a>
+            @endif
+
+            @if($canData || $canDatabase)
+            <div class="pt-4 pb-1 px-3">
+                <span class="text-[10px] font-semibold text-warm-400 uppercase tracking-wider">System</span>
+            </div>
+            @endif
+
+            @if($canDatabase)
+            <a href="{{ url('/admin/database') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
+                {{ str_starts_with($currentRoute, 'admin.database') ? 'bg-physical-100 text-physical-700' : 'text-warm-500 hover:text-warm-700 hover:bg-warm-100' }}">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/></svg>
+                Database
+            </a>
+            @endif
+
+            @if($canData)
+            <a href="{{ url('/admin/data') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
+                {{ $currentRoute === 'admin.data' || str_starts_with($currentRoute, 'admin.data.') ? 'bg-physical-100 text-physical-700' : 'text-warm-500 hover:text-warm-700 hover:bg-warm-100' }}">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                Data editor
             </a>
             @endif
             @endif

@@ -100,7 +100,7 @@
             'severity' => null,
             'urgencyLabel' => 'Worth following up',
             'seekHelp' => [
-                'Since you weren't sure which path fits, consider trying both screening flows',
+                'Since you weren\'t sure which path fits, consider trying both screening flows',
                 'A primary care visit can help you figure out whether this is physical, mental, or both',
             ],
         ]

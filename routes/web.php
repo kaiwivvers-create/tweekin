@@ -192,6 +192,185 @@ Route::post('/api/generate-section', function (Request $request) {
     return response()->json(['content' => $response]);
 })->name('api.generate-section');
 
+// Google Places photo redirect — keeps the API key out of the browser.
+Route::get('/api/place-photo', function (Request $request) {
+    $encoded = (string) $request->query('ref', '');
+    $photoName = base64_decode(strtr($encoded, '-_', '+/'), true);
+
+    if (!$photoName || !str_starts_with($photoName, 'places/')) {
+        abort(404);
+    }
+
+    $url = (new \App\Services\GooglePlacesService())->resolvePhotoUrl($photoName);
+
+    if ($url === null) {
+        abort(404);
+    }
+
+    return redirect()->away($url);
+})->name('api.place-photo');
+
+// Nearby care API (location-aware)
+Route::post('/api/nearby-care', function (Request $request) {
+    $request->validate([
+        'context' => 'required|array',
+        'location' => 'nullable|string|max:200',
+        'query' => 'nullable|string|max:200',
+        'lat' => 'nullable|numeric|between:-90,90',
+        'lon' => 'nullable|numeric|between:-180,180',
+    ]);
+
+    $gemini = new \App\Services\GeminiChatService();
+
+    $context = $request->input('context');
+    if ($request->filled('location')) {
+        $context['location'] = $request->input('location');
+    }
+
+    $type = $context['type'] ?? 'general';
+    $lat = $request->filled('lat') ? (float) $request->input('lat') : null;
+    $lon = $request->filled('lon') ? (float) $request->input('lon') : null;
+    $locationSource = ($lat !== null && $lon !== null) ? 'gps' : null;
+    $geocodeFailed = false;
+
+    // An area the user typed themselves beats any guess, so try it first.
+    if (($lat === null || $lon === null) && $request->filled('query')) {
+        $geocoded = (new \App\Services\GeocodingService())->search((string) $request->input('query'));
+
+        if ($geocoded !== null) {
+            $lat = $geocoded['lat'];
+            $lon = $geocoded['lon'];
+            $locationSource = 'query';
+            $context['location'] = $geocoded['label'];
+        } else {
+            $geocodeFailed = true;
+        }
+    }
+
+    // Still nothing: no GPS (permission denied, insecure origin, desktop with
+    // location off) and no usable typed area, so fall back to a coarse network
+    // location. Anything is better than guessing at facility names.
+    if ($lat === null || $lon === null) {
+        $coarse = (new \App\Services\IpLocationService())->locate($request->ip());
+
+        if ($coarse !== null) {
+            $lat = $coarse['lat'];
+            $lon = $coarse['lon'];
+            $locationSource = 'ip';
+
+            if (empty($context['location'])) {
+                $context['location'] = $coarse['label'] ?: null;
+            }
+        }
+    }
+
+    // Real facilities. Google Places is preferred when a key is configured because
+    // it supplies a photo for almost every place; OpenStreetMap is the keyless
+    // fallback and also covers the case where Places finds nothing. Neither needs
+    // the AI to be configured.
+    $places = [];
+    $placesApi = new \App\Services\GooglePlacesService();
+
+    if ($lat !== null && $lon !== null) {
+        if ($placesApi->isConfigured()) {
+            $places = $placesApi->searchNearby($lat, $lon, $type);
+        }
+
+        if (count($places) === 0) {
+            $places = (new \App\Services\OverpassService())->findNearby($lat, $lon, $type);
+        }
+    }
+
+    // Nothing real found: return no facility cards at all. This card promises care
+    // near the user, so invented facility names would be actively misleading —
+    // real helplines are the only honest thing left to show.
+    if (count($places) === 0) {
+        return response()->json([
+            'facilities' => [],
+            'helplines' => $gemini->localHelplines($context) ?? $gemini->fallbackHelplines($type),
+            'location' => $context['location'] ?? null,
+            'locationSource' => $locationSource,
+            'geocodeFailed' => $geocodeFailed,
+        ]);
+    }
+
+    $annotations = $gemini->annotatePlaces($places, $context) ?? ['notes' => [], 'helplines' => []];
+
+    // The model returns notes in its own order of fit, so use that as the ranking
+    // and drop anything it did not consider worth recommending.
+    $ranked = [];
+    foreach ($annotations['notes'] as $note) {
+        $index = (int) ($note['index'] ?? -1);
+        if (!isset($places[$index])) {
+            continue;
+        }
+        $ranked[] = ['place' => $places[$index], 'note' => $note];
+    }
+
+    if (count($ranked) === 0) {
+        foreach (array_slice($places, 0, 6) as $place) {
+            $ranked[] = ['place' => $place, 'note' => []];
+        }
+    }
+
+    $ranked = array_slice($ranked, 0, 6);
+
+    // Resolve photos. Google photos go through our own redirect so the API key
+    // stays server-side; Wikimedia is the fallback and is cached for a week.
+    $images = new \App\Services\PlaceImageService();
+    $imageUrls = [];
+    foreach ($ranked as $i => $entry) {
+        $photoRef = $entry['place']['photoRef'] ?? null;
+
+        $imageUrls[$i] = $photoRef
+            ? route('api.place-photo', ['ref' => rtrim(strtr(base64_encode($photoRef), '+/', '-_'), '=')])
+            : $images->resolve(
+                $entry['place']['name'],
+                $entry['place']['lat'],
+                $entry['place']['lon'],
+                $context['location'] ?? null,
+                $entry['place']['wikipedia'] ?? null,
+                $entry['place']['wikidata'] ?? null
+            );
+    }
+
+    $facilities = [];
+    foreach ($ranked as $i => $entry) {
+        $place = $entry['place'];
+        $note = $entry['note'];
+
+        $facilities[] = [
+            'name' => $place['name'],
+            'type' => $place['type'],
+            'address' => $place['address'],
+            'phone' => $place['phone'],
+            'website' => $place['website'] ?? '',
+            'mapsUrl' => $place['mapsUrl'] ?? '',
+            'distanceKm' => $place['distanceKm'],
+            'lat' => $place['lat'],
+            'lon' => $place['lon'],
+            'rating' => $place['rating'] ?? null,
+            'ratingCount' => $place['ratingCount'] ?? null,
+            'goodFor' => (string) ($note['goodFor'] ?? ''),
+            'why' => (string) ($note['why'] ?? ''),
+            'image' => $imageUrls[$i] ?? null,
+        ];
+    }
+
+    $helplines = $annotations['helplines'];
+    if (count($helplines) === 0) {
+        $helplines = $gemini->fallbackHelplines($type);
+    }
+
+    return response()->json([
+        'facilities' => $facilities,
+        'helplines' => $helplines,
+        'location' => $context['location'] ?? null,
+        'locationSource' => $locationSource,
+        'geocodeFailed' => $geocodeFailed,
+    ]);
+})->name('api.nearby-care');
+
 // AI Chat API
 Route::post('/api/chat', function (Request $request) {
     $request->validate([

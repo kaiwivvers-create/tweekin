@@ -141,26 +141,14 @@ document.addEventListener('DOMContentLoaded', function () {
         'bg-' + themeClass + '-50 border border-' + themeClass + '-200 rounded-2xl rounded-tl-md p-4 max-w-[85%]';
 
       var content = document.createElement('div');
-      content.className = 'text-sm text-' + themeClass + '-700 leading-relaxed space-y-2';
+      content.className = 'text-sm text-' + themeClass + '-700 leading-relaxed';
 
-      var paragraphs = text.split(/\n\n+/);
-      for (var i = 0; i < paragraphs.length; i++) {
-        var para = document.createElement('p');
-        var parts = paragraphs[i].split(/\*\*(.*?)\*\*/g);
-        for (var j = 0; j < parts.length; j++) {
-          if (j % 2 === 1) {
-            var strong = document.createElement('strong');
-            strong.textContent = parts[j];
-            para.appendChild(strong);
-          } else {
-            var lines = parts[j].split(/\n/);
-            for (var k = 0; k < lines.length; k++) {
-              if (k > 0) para.appendChild(document.createElement('br'));
-              para.appendChild(document.createTextNode(lines[k]));
-            }
-          }
-        }
-        content.appendChild(para);
+      // Shared renderer (results-sections.js) so ### headings, bullets, bold
+      // and dividers look the same here as in the AI result sections.
+      if (typeof window.renderMarkdown === 'function') {
+        content.innerHTML = window.renderMarkdown(text, themeClass, 'text-' + themeClass + '-700');
+      } else {
+        content.textContent = text;
       }
 
       bubble.appendChild(content);

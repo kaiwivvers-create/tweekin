@@ -166,29 +166,32 @@
             });
         });
 
-        // Modal system
-        function openModal(name) {
+        // Modal system. A template picks its own width with data-modal-size.
+        const modalWidths = { sm: 'max-w-md', md: 'max-w-lg', lg: 'max-w-2xl', xl: 'max-w-4xl' };
+
+        function openModal(name, size) {
             const container = document.getElementById('modal-container');
             const content = document.getElementById('modal-content');
             const modal = document.getElementById('modal-' + name);
-            if (modal) {
-                content.innerHTML = modal.innerHTML;
-                container.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            }
+            if (!modal) return;
+
+            const width = modalWidths[size || modal.dataset.modalSize] || modalWidths.md;
+            content.classList.remove(...Object.values(modalWidths));
+            content.classList.add(width);
+
+            content.innerHTML = modal.innerHTML;
+            container.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
         }
         function openModalWithData(name, data) {
-            const container = document.getElementById('modal-container');
             const content = document.getElementById('modal-content');
             const modal = document.getElementById('modal-' + name);
             if (modal) {
+                openModal(name);
                 // Inject data as a script tag so the modal's init can read it
-                content.innerHTML = modal.innerHTML;
                 const initScript = document.createElement('script');
                 initScript.textContent = 'try { window._modalData = ' + JSON.stringify(data) + '; } catch(e) { window._modalData = {}; }';
                 content.appendChild(initScript);
-                container.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
             }
         }
         function closeModal() {
@@ -286,8 +289,10 @@
                         card.appendChild(header);
 
                         const contentDiv = document.createElement('div');
-                        contentDiv.className = 'text-sm text-warm-700 leading-relaxed space-y-3';                        // Use shared markdown renderer from results-sections.js
-                        renderAIMarkdown(contentDiv, json.response, 'mental');
+                        contentDiv.className = 'text-sm text-warm-700 leading-relaxed';
+                        // Use shared markdown renderer from results-sections.js
+                        // (the card below already prints its own disclaimer)
+                        renderAIMarkdown(contentDiv, json.response, 'mental', { disclaimer: false, text: 'text-warm-700' });
                         card.appendChild(contentDiv);
 
                         const footer = document.createElement('p');

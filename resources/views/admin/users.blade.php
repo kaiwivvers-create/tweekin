@@ -49,7 +49,14 @@
                         <td class="px-6 py-4 text-warm-500">{{ $user->screenings_count ?? $user->screenings()->count() }}</td>
                         <td class="px-6 py-4 text-warm-400 text-xs">{{ $user->created_at->format('M j, Y') }}</td>
                         <td class="px-6 py-4">
-                            <a href="{{ url('/admin/screenings?user=' . $user->id) }}" class="text-xs text-mental-600 hover:text-mental-700">View screenings</a>
+                            <div class="flex items-center gap-3">
+                                <a href="{{ url('/admin/screenings?user=' . $user->id) }}" class="text-xs text-mental-600 hover:text-mental-700">View screenings</a>
+                                @if($isSuperAdmin)
+                                    <button type="button" onclick="openModal('edit-users-{{ $user->id }}')"
+                                            class="text-xs font-medium text-mental-600 hover:text-mental-700">Edit</button>
+                                    <a href="{{ route('admin.data.show', ['users', $user->id]) }}" class="text-xs text-warm-400 hover:text-warm-600">Open page</a>
+                                @endif
+                            </div>
                         </td>
                     </tr>
                     @endforeach
@@ -60,5 +67,28 @@
             {{ $users->links() }}
         </div>
     </div>
+
+    {{-- One inert editor modal per row, cloned into the dialog on demand. --}}
+    @if($isSuperAdmin)
+        @foreach($users as $user)
+            @include('admin.data._edit-modal', [
+                'table' => 'users',
+                'meta' => $meta,
+                'columns' => $columns,
+                'jsonColumns' => $jsonColumns,
+                'roles' => $roles,
+                'record' => $user,
+            ])
+        @endforeach
+    @endif
 </div>
+
+@if($isSuperAdmin && session('error') && old('_record'))
+    {{-- A save failed: reopen that same modal, with the typed values still in it. --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            openModal('edit-users-' + @json(old('_record')));
+        });
+    </script>
+@endif
 @endsection

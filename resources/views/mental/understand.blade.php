@@ -123,11 +123,12 @@
             <div class="p-5 border-b border-warm-100 bg-mental-50/30">
                 <div class="flex items-center gap-3">
                     <div class="w-8 h-8 rounded-lg bg-mental-100 border border-mental-200 flex items-center justify-center shrink-0"><svg class="w-4 h-4 text-mental-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
-                    <h2 class="font-display font-bold text-lg text-warm-800">Nearby care</h2>
+                    <h2 class="font-display font-bold text-lg text-warm-800">Care near you</h2>
                 </div>
+                <p class="text-xs text-warm-500 leading-relaxed mt-1">Real facilities in your area that handle what you described — with actual names, distance, directions and who to call.</p>
             </div>
-            <div class="p-5 ai-section-content" id="nearby-care-content">
-                <div class="flex flex-col items-center justify-center py-6 gap-3"><div class="relative w-10 h-10"><div class="absolute inset-0 rounded-full border-[3px] border-mental-200 border-t-mental-500 animate-spin" style="animation-duration: 0.9s;"></div><div class="absolute inset-1 rounded-full border-[3px] border-physical-200 border-b-physical-500 animate-spin" style="animation-duration: 1.2s; animation-direction: reverse;"></div></div><p class="text-xs text-warm-400 font-medium">Detecting your location...</p></div>
+            <div class="p-5" id="nearby-care-body">
+                <div class="flex flex-col items-center justify-center py-8 gap-3"><div class="relative w-10 h-10"><div class="absolute inset-0 rounded-full border-[3px] border-mental-200 border-t-mental-500 animate-spin" style="animation-duration: 0.9s;"></div><div class="absolute inset-1 rounded-full border-[3px] border-physical-200 border-b-physical-500 animate-spin" style="animation-duration: 1.2s; animation-direction: reverse;"></div></div><p class="text-xs text-warm-400 font-medium">Detecting your location...</p></div>
             </div>
         </div>
 
@@ -216,37 +217,11 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             getUserLocation().then(function(loc) {
-                if (loc) screeningContext.location = loc;
+                if (loc && loc.label) screeningContext.location = loc.label;
                 sections.forEach(function(s) { fetchAISection(s, screeningContext, csrfToken, themeClass); });
-                fetchNearbyCare(loc, screeningContext, csrfToken);
+                fetchNearbyCare(loc, screeningContext, csrfToken, themeClass);
             });
         });
-
-        function fetchNearbyCare(location, ctx, csrf) {
-            var el = document.getElementById('nearby-care-content');
-            if (!el) return;
-            if (!location) {
-                el.innerHTML = '<p class="text-sm text-warm-500 italic">Enable location permissions to see care options near you.</p>';
-                return;
-            }
-            el.innerHTML = '<div class="flex flex-col items-center justify-center py-6 gap-3"><div class="relative w-10 h-10"><div class="absolute inset-0 rounded-full border-[3px] border-mental-200 border-t-mental-500 animate-spin" style="animation-duration: 0.9s;"></div><div class="absolute inset-1 rounded-full border-[3px] border-physical-200 border-b-physical-500 animate-spin" style="animation-duration: 1.2s; animation-direction: reverse;"></div></div><p class="text-xs text-warm-400 font-medium">Finding care near ' + location + '...</p></div>';
-            fetch('/api/generate-section', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
-                body: JSON.stringify({ section: 'specialists', context: Object.assign({}, ctx, { location: location }) })
-            })
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                if (data.content) {
-                    renderAIMarkdown(el, '### Care options near ' + location + '\n\n' + data.content, themeClass);
-                } else {
-                    el.innerHTML = '<p class="text-sm text-warm-500 italic">Could not load nearby options.</p>';
-                }
-            })
-            .catch(function() {
-                el.innerHTML = '<p class="text-sm text-warm-500 italic">Could not load nearby options.</p>';
-            });
-        }
     })();
 
     // Auto-save screening on page load

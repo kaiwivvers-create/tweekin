@@ -119,6 +119,10 @@ input[type="checkbox"].peer:focus-visible {
     animation: gradient-shift 6s linear infinite;
 }
 
+/* Hide scrollbar on carousels */
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
 /* Radio/checkbox dot styling */
 .peer:checked ~ div .w-2\.5.h-2\.5 { transform: scale(1); }
 .peer:checked ~ div .w-4.h-4 { border-color: var(--color-physical-500); }

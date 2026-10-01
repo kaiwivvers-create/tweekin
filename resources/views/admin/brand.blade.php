@@ -315,30 +315,58 @@
         </h2>
         <p class="text-sm text-warm-500">Connect Google Gemini to power the AI chat on results pages. Get a free API key at <a href="https://aistudio.google.com/" target="_blank" class="text-mental-500 underline underline-offset-2">aistudio.google.com</a>.</p>
 
-        <form method="POST" action="{{ route('admin.brand.api-key') }}" class="space-y-3">
+        <form method="POST" action="{{ route('admin.brand.api-key') }}" class="space-y-4">
             @csrf
-            <div class="flex items-center gap-3">
-                <div class="flex-1">
-                    <input type="password" name="google_api_key" value="{{ $settings['google_api_key'] ?? '' }}"
-                           placeholder="Paste your Google AI API key here..."
-                           class="w-full px-4 py-2.5 rounded-xl border-2 border-warm-200 bg-white text-warm-800 focus:border-mental-400 focus:ring-0 transition-colors text-sm font-mono"
-                           autocomplete="off">
+            <div class="space-y-2">
+                <label class="block text-sm font-semibold text-warm-700">Google AI API key</label>
+                <div class="flex items-center gap-3">
+                    <div class="flex-1">
+                        <input type="password" name="google_api_key" value="{{ $settings['google_api_key'] ?? '' }}"
+                               placeholder="Paste your Google AI API key here..."
+                               class="w-full px-4 py-2.5 rounded-xl border-2 border-warm-200 bg-white text-warm-800 focus:border-mental-400 focus:ring-0 transition-colors text-sm font-mono"
+                               autocomplete="off">
+                    </div>
                 </div>
-                <button type="submit" class="px-5 py-2.5 rounded-xl bg-mental-300 hover:bg-mental-400 text-mental-800 font-semibold text-sm transition-colors shrink-0">
-                    Save Key
-                </button>
+                @if($settings['google_api_key'] ?? '')
+                    <div class="flex items-center gap-2 text-xs text-success">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        Configured — AI chat and generated sections are active
+                    </div>
+                @else
+                    <div class="flex items-center gap-2 text-xs text-warm-400">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        No key — AI sections fall back to generic answers
+                    </div>
+                @endif
             </div>
-            @if($settings['google_api_key'] ?? '')
-                <div class="flex items-center gap-2 text-xs text-success">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                    API key configured — AI chat is active
-                </div>
-            @else
-                <div class="flex items-center gap-2 text-xs text-warm-400">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    No API key — AI chat falls back to pre-written responses
-                </div>
-            @endif
+
+            <div class="space-y-2 pt-4 border-t border-warm-100">
+                <label class="block text-sm font-semibold text-warm-700">Google Places API key</label>
+                <p class="text-xs text-warm-500 leading-relaxed">
+                    Powers “Care near you” with real hospitals and clinics, including a photo of each one.
+                    Enable <strong>Places API (New)</strong> on the key and make sure billing is on, then paste it here.
+                    Without it, nearby care falls back to OpenStreetMap, which has fewer photos.
+                </p>
+                <input type="password" name="google_places_api_key" value="{{ $settings['google_places_api_key'] ?? '' }}"
+                       placeholder="Paste your Google Places API key here..."
+                       class="w-full px-4 py-2.5 rounded-xl border-2 border-warm-200 bg-white text-warm-800 focus:border-mental-400 focus:ring-0 transition-colors text-sm font-mono"
+                       autocomplete="off">
+                @if($settings['google_places_api_key'] ?? '')
+                    <div class="flex items-center gap-2 text-xs text-success">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        Configured — nearby care uses Google Places with photos
+                    </div>
+                @else
+                    <div class="flex items-center gap-2 text-xs text-warm-400">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        No key — nearby care falls back to OpenStreetMap
+                    </div>
+                @endif
+            </div>
+
+            <button type="submit" class="px-5 py-2.5 rounded-xl bg-mental-300 hover:bg-mental-400 text-mental-800 font-semibold text-sm transition-colors">
+                Save keys
+            </button>
         </form>
     </div>
 </div>

@@ -18,6 +18,9 @@
                         <th class="text-left px-6 py-3 font-semibold text-warm-700">User</th>
                         <th class="text-left px-6 py-3 font-semibold text-warm-700">Severity</th>
                         <th class="text-left px-6 py-3 font-semibold text-warm-700">Date</th>
+                        @if(Auth::user()->isSuperAdmin())
+                            <th class="text-left px-6 py-3 font-semibold text-warm-700">Actions</th>
+                        @endif
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-warm-100">
@@ -44,10 +47,19 @@
                             @endif
                         </td>
                         <td class="px-6 py-4 text-warm-400 text-xs">{{ $screening->created_at->format('M j, Y g:i A') }}</td>
+                        @if(Auth::user()->isSuperAdmin())
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <button type="button" onclick="openModal('edit-screenings-{{ $screening->id }}')"
+                                            class="text-xs font-medium text-mental-600 hover:text-mental-700">Edit</button>
+                                    <a href="{{ route('admin.data.show', ['screenings', $screening->id]) }}" class="text-xs text-warm-400 hover:text-warm-600">Open page</a>
+                                </div>
+                            </td>
+                        @endif
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="px-6 py-8 text-center text-warm-400">No screenings found.</td>
+                        <td colspan="6" class="px-6 py-8 text-center text-warm-400">No screenings found.</td>
                     </tr>
                     @endforelse
                 </tbody>
@@ -57,5 +69,28 @@
             {{ $screenings->links() }}
         </div>
     </div>
+
+    {{-- One inert editor modal per row, cloned into the dialog on demand. --}}
+    @if(Auth::user()->isSuperAdmin())
+        @foreach($screenings as $screening)
+            @include('admin.data._edit-modal', [
+                'table' => 'screenings',
+                'meta' => $meta,
+                'columns' => $columns,
+                'jsonColumns' => $jsonColumns,
+                'roles' => $roles,
+                'record' => $screening,
+            ])
+        @endforeach
+    @endif
 </div>
+
+@if(Auth::user()->isSuperAdmin() && session('error') && old('_record'))
+    {{-- A save failed: reopen that same modal, with the typed values still in it. --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            openModal('edit-screenings-' + @json(old('_record')));
+        });
+    </script>
+@endif
 @endsection
