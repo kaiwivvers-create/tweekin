@@ -26,10 +26,6 @@
     </style>
 </head>
 <body class="min-h-screen flex bg-warm-50 text-warm-800 font-sans">
-    <script>
-        if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
-    </script>
-
     @php
         $isLogin = request()->is('login');
         $appName = $brand['name'] ?? config('app.name', 'Tweek');

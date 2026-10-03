@@ -1,4 +1,4 @@
-<header class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-warm-200/60" x-data="{ open: false, dark: localStorage.getItem('theme') === 'dark' }" x-init="$watch('dark', v => { document.documentElement.classList.toggle('dark', v); localStorage.setItem('theme', v ? 'dark' : 'light') }); if (dark) document.documentElement.classList.add('dark')">
+<header class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-warm-200/60" x-data="{ open: false }">
     <nav class="w-full px-6 sm:px-8 lg:px-12 h-14 flex items-center justify-between">
         {{-- Left: Profile --}}
         <div class="flex items-center gap-2.5">
@@ -26,11 +26,6 @@
 
         {{-- Right: Desktop nav --}}
         <div class="hidden sm:flex items-center gap-4">
-            {{-- Dark mode toggle (hidden for now) --}}
-            <button @click="dark = !dark" class="hidden w-8 h-8 items-center justify-center rounded-lg hover:bg-warm-100 transition-colors" :title="dark ? 'Switch to light mode' : 'Switch to dark mode'">
-                <svg x-show="!dark" class="w-4 h-4 text-warm-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
-                <svg x-show="dark" x-cloak class="w-4 h-4 text-mental-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-            </button>
             <a href="{{ route('home') }}" class="text-sm font-medium text-warm-500 hover:text-warm-700 transition-colors">Home</a>
 
             @auth
@@ -67,11 +62,6 @@
          x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2"
          @click.outside="open = false"
          class="sm:hidden border-t border-warm-100 bg-white px-6 py-3 space-y-1">
-        <button @click="dark = !dark" class="hidden items-center gap-2 w-full py-2 text-sm font-medium text-warm-600 hover:text-warm-800 rounded-lg hover:bg-warm-50 transition-colors">
-            <svg x-show="!dark" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
-            <svg x-show="dark" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-            <span x-text="dark ? 'Light mode' : 'Dark mode'"></span>
-        </button>
         <a href="{{ route('home') }}" class="block py-2 text-sm font-medium text-warm-600 hover:text-warm-800 rounded-lg hover:bg-warm-50 transition-colors">Home</a>
 
         @auth

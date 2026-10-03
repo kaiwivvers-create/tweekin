@@ -15,10 +15,6 @@
     @stack('styles')
 </head>
 <body class="min-h-screen flex flex-col bg-warm-50 text-warm-800 font-sans">
-    <script>
-        if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
-    </script>
-
     @include('partials.header')
 
     @auth
